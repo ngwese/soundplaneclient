@@ -66,7 +66,7 @@ inline bool isControllerZoneType(Symbol t) {
 const int kZoneValArraySize = 8;
 
 class Zone {
-  friend class SoundplaneModel;
+  friend class Client;
 
 public:
   Zone();

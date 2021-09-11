@@ -44,7 +44,6 @@ set(SOURCE_FILES
   # sp altered
   TouchTracker.cpp
   Zone.cpp
-  SoundplaneModel.cpp
   # new
   Logging.cpp
   Client.cpp
