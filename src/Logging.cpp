@@ -1,5 +1,3 @@
 #include "Logging.h"
 
-std::ostream& MLConsole() {
-    return std::cout;
-}
+std::ostream &MLConsole() { return std::cout; }

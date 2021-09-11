@@ -11,15 +11,11 @@
 
 const int kMLModelUpdateInterval = 100;
 
-MLModel::MLModel() : MLPropertyListener(this)
-{
-}
+MLModel::MLModel() : MLPropertyListener(this) {}
 
-MLModel::~MLModel()
-{
-}
+MLModel::~MLModel() {}
 
-void MLModel::startModelTimer()
-{
-	mTimer.start([&]() { updateChangedProperties(); }, milliseconds(kMLModelUpdateInterval));
+void MLModel::startModelTimer() {
+  mTimer.start([&]() { updateChangedProperties(); },
+               milliseconds(kMLModelUpdateInterval));
 }

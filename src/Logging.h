@@ -1,5 +1,5 @@
-#pragma <once>
+#pragma < once>
 
 #include <iostream>
 
-extern std::ostream& MLConsole();
+extern std::ostream &MLConsole();
