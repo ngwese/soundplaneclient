@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <array>
+
 static constexpr int kMaxTouches = 16;
 
 enum TouchState {

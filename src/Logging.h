@@ -1,5 +1,8 @@
-#pragma < once>
+#ifndef __LOGGING_H__
+#define __LOGGING_H__
 
 #include <iostream>
 
-extern std::ostream &MLConsole();
+std::ostream& MLConsole();
+
+#endif

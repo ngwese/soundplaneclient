@@ -3,29 +3,23 @@
 // Copyright (c) 2013 Madrona Labs LLC. http://www.madronalabs.com
 // Distributed under the MIT license: http://madrona-labs.mit-license.org/
 
-#ifndef __SOUNDPLANE_MODEL__
-#define __SOUNDPLANE_MODEL__
+#ifndef __SOUNDPLANE_CLIENT_H__
+#define __SOUNDPLANE_CLIENT_H__
 
 #include <list>
 #include <map>
 #include <stdint.h>
 #include <thread>
 
-// #include "cJSON.h"
 #include "MLModel.h"
-// #include "MLOSCListener.h"
-// #include "MLNetServiceHub.h"
 #include "MLSymbol.h"
-// #include "MLFileCollection.h"
 #include "MLQueue.h"
 
 #include "SoundplaneDriver.h"
 #include "SoundplaneModelA.h"
 
+#include "Output.h"
 #include "TouchTracker.h"
-// #include "SoundplaneMIDIOutput.h"
-// #include "SoundplaneOSCOutput.h"
-// #include "SoundplaneBinaryData.h"
 #include "Zone.h"
 
 using namespace ml;
@@ -41,14 +35,12 @@ typedef enum {
   ageColumn = 4
 } TouchSignalColumns;
 
-const int kSensorFrameQueueSize = 16;
+const int kSensorFrameQueueSize = 32; // FIXME: this used to be fine at 16
 
 class Client : public SoundplaneDriverListener,
-                        // public MLOSCListener,
-                        // public MLNetServiceHub,
-                        public MLModel {
+               public MLModel {
 public:
-  Client();
+  Client(Output &output);
   ~Client();
 
   // SoundplaneDriverListener
@@ -61,14 +53,6 @@ public:
   void doPropertyChangeAction(ml::Symbol, const ml::Value &) override;
 
   void setAllPropertiesToDefaults();
-
-  // MLOSCListener
-  // void ProcessMessage(const osc::ReceivedMessage &m, const IpEndpointName&
-  // remoteEndpoint) override; void ProcessBundle(const osc::ReceivedBundle &b,
-  // const IpEndpointName& remoteEndpoint) override;
-
-  // OSC services
-  // const std::vector<std::string>& getServicesList();
 
   // MLFileCollection& getZonePresetsCollection() { return *mZonePresets; }
 
@@ -89,7 +73,6 @@ public:
   int getStateIndex();
   const char *getHardwareStr();
   const char *getStatusStr();
-  const char *getClientStr();
 
   int getSerialNumber() const { return mSerialNumber; }
 
@@ -113,21 +96,21 @@ public:
 
   void getMinMaxHistory(int n);
 
-  const ml::Matrix &getTouchFrame() { return mTouchFrame; }
-  const ml::Matrix &getTouchHistory() { return mTouchHistory; }
-  const ml::Matrix getRawSignal() {
-    std::lock_guard<std::mutex> lock(mRawSignalMutex);
-    return mRawSignal;
-  }
-  const ml::Matrix getCalibratedSignal() {
-    std::lock_guard<std::mutex> lock(mCalibratedSignalMutex);
-    return sensorFrameToSignal(mCalibratedFrame);
-  }
+  // const ml::Matrix &getTouchFrame() { return mTouchFrame; }
+  // const ml::Matrix &getTouchHistory() { return mTouchHistory; }
+  // const ml::Matrix getRawSignal() {
+  //   std::lock_guard<std::mutex> lock(mRawSignalMutex);
+  //   return mRawSignal;
+  // }
+  // const ml::Matrix getCalibratedSignal() {
+  //   std::lock_guard<std::mutex> lock(mCalibratedSignalMutex);
+  //   return sensorFrameToSignal(mCalibratedFrame);
+  // }
 
-  const ml::Matrix getSmoothedSignal() {
-    std::lock_guard<std::mutex> lock(mSmoothedSignalMutex);
-    return mSmoothedSignal;
-  }
+  // const ml::Matrix getSmoothedSignal() {
+  //   std::lock_guard<std::mutex> lock(mSmoothedSignalMutex);
+  //   return mSmoothedSignal;
+  // }
 
   const TouchArray &getTouchArray() { return mTouchArray1; }
 
@@ -143,9 +126,6 @@ public:
   // bool loadZonePresetByName(const std::string& name);
 
   int getDeviceState(void);
-  int getClientState(void);
-
-  // SoundplaneMIDIOutput& getMIDIOutput() { return mMIDIOutput; }
 
 private:
   TouchArray mTouchArray1{};
@@ -161,7 +141,6 @@ private:
 
   TouchArray trackTouches(const SensorFrame &frame);
   TouchArray getTestTouchesFromTracker(time_point<system_clock> now);
-  void saveTouchHistory(const TouchArray &t);
 
   void initialize();
   bool findNoteChanges(TouchArray t0, TouchArray t1);
@@ -181,8 +160,6 @@ private:
   std::vector<Zone> mZones;
   ml::Matrix mZoneIndexMap;
 
-  bool mOutputEnabled;
-
   static const int kMiscStringSize{256};
   void loadZonesFromString(const std::string &zoneStr);
 
@@ -191,8 +168,8 @@ private:
 
   int mSerialNumber;
 
-  // SoundplaneMIDIOutput mMIDIOutput;
-  // SoundplaneOSCOutput mOSCOutput;
+  bool mOutputEnabled;
+  Output &mOutput;
 
   SensorFrame mSensorFrame{};
   SensorFrame mCalibratedFrame{};
@@ -201,9 +178,9 @@ private:
 
   int mMaxTouches;
 
-  ml::Matrix mTouchFrame;
-  std::mutex mTouchFrameMutex;
-  ml::Matrix mTouchHistory;
+  // ml::Matrix mTouchFrame;
+  // std::mutex mTouchFrameMutex;
+  // ml::Matrix mTouchHistory;
 
   bool mCalibrating;
   bool mTestTouchesOn;
@@ -211,7 +188,7 @@ private:
   bool mRequireSendNextFrame{false};
   bool mSelectingCarriers;
   bool mRaw;
-  bool mSendMatrixData;
+  bool mSendMatrixData{false};
 
   SoundplaneDriver::Carriers mCarriers;
 
@@ -220,15 +197,15 @@ private:
   SensorFrameStats mStats;
   SensorFrame mCalibrateMeanInv{};
 
-  ml::Matrix mRawSignal;
-  std::mutex mRawSignalMutex;
+  // ml::Matrix mRawSignal;
+  // std::mutex mRawSignalMutex;
 
-  ml::Matrix mCalibratedSignal;
-  std::mutex mCalibratedSignalMutex;
+  // ml::Matrix mCalibratedSignal;
+  // std::mutex mCalibratedSignalMutex;
 
-  SensorFrame mSmoothedFrame{};
-  ml::Matrix mSmoothedSignal;
-  std::mutex mSmoothedSignalMutex;
+  // SensorFrame mSmoothedFrame{};
+  // ml::Matrix mSmoothedSignal;
+  // std::mutex mSmoothedSignalMutex;
 
   int mCalibrateStep; // calibrate step from 0 - end
   int mTotalCalibrateSteps;
@@ -259,9 +236,6 @@ private:
   std::vector<float> mMaxNoiseByCarrierSet;
   std::vector<float> mMaxNoiseFreqByCarrierSet;
 
-  // bool mKymaMode;
-  // int mKymaIsConnected; // TODO more custom clients
-
   // std::unique_ptr<MLFileCollection> mTouchPresets;
   // std::unique_ptr<MLFileCollection> mZonePresets;
 
@@ -278,4 +252,4 @@ private:
   time_point<system_clock> mPrevProcessTouchesTime{};
 };
 
-#endif // __SOUNDPLANE_MODEL__
+#endif // __SOUNDPLANE_CLIENT_H__
