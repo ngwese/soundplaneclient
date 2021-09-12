@@ -45,9 +45,13 @@ set(SOURCE_FILES
   TouchTracker.cpp
   Zone.cpp
   # new
+  ConsoleOutput.cpp
   Logging.cpp
   Client.cpp
+  main.cpp
 )
 
-add_library(soundplaneclient ${SOURCE_FILES})
+# add_library(soundplaneclient ${SOURCE_FILES})
+add_executable(soundplaneclient ${SOURCE_FILES})
 target_link_libraries(soundplaneclient madronalib soundplanelib)
+target_link_libraries(soundplaneclient pthread)

@@ -11,21 +11,15 @@
 #include <stdint.h>
 #include <thread>
 
-// #include "cJSON.h"
 #include "MLModel.h"
-// #include "MLOSCListener.h"
-// #include "MLNetServiceHub.h"
 #include "MLSymbol.h"
-// #include "MLFileCollection.h"
 #include "MLQueue.h"
 
 #include "SoundplaneDriver.h"
 #include "SoundplaneModelA.h"
 
+#include "Output.h"
 #include "TouchTracker.h"
-// #include "SoundplaneMIDIOutput.h"
-// #include "SoundplaneOSCOutput.h"
-// #include "SoundplaneBinaryData.h"
 #include "Zone.h"
 
 using namespace ml;
@@ -44,9 +38,7 @@ typedef enum {
 const int kSensorFrameQueueSize = 16;
 
 class Client : public SoundplaneDriverListener,
-                        // public MLOSCListener,
-                        // public MLNetServiceHub,
-                        public MLModel {
+               public MLModel {
 public:
   Client();
   ~Client();
@@ -61,14 +53,6 @@ public:
   void doPropertyChangeAction(ml::Symbol, const ml::Value &) override;
 
   void setAllPropertiesToDefaults();
-
-  // MLOSCListener
-  // void ProcessMessage(const osc::ReceivedMessage &m, const IpEndpointName&
-  // remoteEndpoint) override; void ProcessBundle(const osc::ReceivedBundle &b,
-  // const IpEndpointName& remoteEndpoint) override;
-
-  // OSC services
-  // const std::vector<std::string>& getServicesList();
 
   // MLFileCollection& getZonePresetsCollection() { return *mZonePresets; }
 

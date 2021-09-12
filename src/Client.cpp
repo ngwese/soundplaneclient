@@ -151,7 +151,7 @@ Client::~Client() {
 
   if (mProcessThread.joinable()) {
     mProcessThread.join();
-    printf("Client: mProcessThread terminated.\n");
+    MLConsole() << "Client: mProcessThread terminated.\n";
   }
 
   // listenToOSC(0);
@@ -161,8 +161,8 @@ Client::~Client() {
 
 void Client::doPropertyChangeAction(ml::Symbol p,
                                              const ml::Value &newVal) {
-  // std::cout << "Client::doPropertyChangeAction: " << p << " -> " <<
-  // newVal << "\n";
+  MLConsole() << "Client::doPropertyChangeAction: " << p << " -> " <<
+  newVal << "\n";
 
   int propertyType = newVal.getType();
   switch (propertyType) {
@@ -314,7 +314,7 @@ void Client::doPropertyChangeAction(ml::Symbol p,
 
     // 		if(hostName == "")
     // 		{
-    // 			std::cout << "OSC service not resolved: falling back to
+    // 			MLConsole() << "OSC service not resolved: falling back to
     // default\n"; 			hostName = "localhost"; 			serviceName = "default";
 
     // 			std::string defaultService = makeDefaultServiceName();
@@ -390,10 +390,15 @@ void Client::doPropertyChangeAction(ml::Symbol p,
 }
 
 void Client::onStartup() {
+  MLConsole() << "onStartup() called\n";
   // get serial number and auto calibrate noise on sync detect
   const unsigned long instrumentModel = 1; // Soundplane A
   // mOSCOutput.setSerialNumber((instrumentModel << 16) |
   // mpDriver->getSerialNumber());
+  MLConsole() << "     state: " << mpDriver->getDeviceState() << "\n";
+  MLConsole() << "  firmware: " << mpDriver->getFirmwareVersion() << "\n";
+  MLConsole() << "    serial: " << mpDriver->getSerialNumber() << "\n";
+  MLConsole() << "  carriers: " << mpDriver->getCarriers() << "\n";
 
   // connected but not calibrated -- disable output.
   enableOutput(false);
@@ -531,7 +536,7 @@ void Client::process(time_point<system_clock> now) {
 }
 
 void Client::outputTouches(TouchArray touches,
-                                    time_point<system_clock> now) {
+                           time_point<system_clock> now) {
   saveTouchHistory(touches);
 
   // let Zones process touches. This is always done at the controller's frame
@@ -575,7 +580,7 @@ void Client::sendTouchesToZones(TouchArray touches) {
     float y = touches[i].y;
 
     if (touchIsActive(touches[i])) {
-      // std::cout << i << ":" << age << "\n";
+      // MLConsole() << i << ":" << age << "\n";
       // get fractional key grid position (Soundplane A)
       Vec2 keyXY(x, y);
 
@@ -647,19 +652,19 @@ void Client::dumpOutputsByZone() {
     // send messages to outputs about each zone
     for (auto &zone : mZones) {
 
-      std::cout << "[zone " << zc++ << ": ";
+      MLConsole() << "[zone " << zc++ << ": ";
 
       // touches
       for (int i = 0; i < kMaxTouches; ++i) {
         Touch t = zone.mOutputTouches[i];
         if (touchIsActive(t)) {
-          std::cout << i << ":" << t.state << ":" << t.z << " ";
+          MLConsole() << i << ":" << t.state << ":" << t.z << " ";
         }
       }
 
-      std::cout << "]";
+      MLConsole() << "]";
     }
-    std::cout << "\n";
+    MLConsole() << "\n";
   }
 }
 
@@ -1152,8 +1157,10 @@ void Client::doInfrequentTasks() {
 
   if (getDeviceState() == kDeviceHasIsochSync) {
     if (mCarrierMaskDirty) {
+      MLConsole() << "mCarrierMaskDirty: calling enableCarriers()\n";
       enableCarriers(mCarriersMask);
     } else if (mNeedsCarriersSet) {
+      MLConsole() << "mNeedsCarriersSet: calling setCarriers() and triggering calibration\n";
       mNeedsCarriersSet = false;
       if (mDoOverrideCarriers) {
         setCarriers(mOverrideCarriers);
@@ -1163,9 +1170,14 @@ void Client::doInfrequentTasks() {
 
       mNeedsCalibrate = true;
     } else if (mNeedsCalibrate && (!mSelectingCarriers)) {
+      MLConsole() << "mNeedsCalibrate: calling beginCalibrate()\n";
       mNeedsCalibrate = false;
       beginCalibrate();
     }
+  }
+
+  if (mCalibrating) {
+    MLConsole() << "Client::doInfrequentTasks(): calib progress = " << getCalibrateProgress() << "\n";
   }
 }
 
@@ -1212,6 +1224,7 @@ void Client::clear() { mTracker.clear(); }
 //
 void Client::beginCalibrate() {
   if (getDeviceState() == kDeviceHasIsochSync) {
+    MLConsole() << "Client::beginCalibrate: getDeviceState() == kDeviceHasIsochSync; starting calibration\n";
     mStats.clear();
     mCalibrating = true;
   }
@@ -1220,6 +1233,7 @@ void Client::beginCalibrate() {
 // called by process routine when enough samples have been collected.
 //
 void Client::endCalibrate() {
+  MLConsole() << "Client::endCalibrate() called\n";
   SensorFrame mean = clamp(mStats.mean(), 0.0001f, 1.f);
   mCalibrateMeanInv = divide(fill(1.f), mean);
   mCalibrating = false;
