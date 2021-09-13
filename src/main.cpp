@@ -6,6 +6,7 @@
 #include "ConsoleOutput.h"
 #include "Logging.h"
 #include "MLProjectInfo.h"
+#include "Zone.h"
 
 int main(int argc, char *argv[]) {
   MLConsole() << "starting client v" << MLProjectInfo::versionString << "\n";
@@ -14,6 +15,7 @@ int main(int argc, char *argv[]) {
 
   ConsoleOutput output(1000);
   Client client(output);
+  client.setZone(Zone::presetChromatic());
 
   std::this_thread::sleep_for(std::chrono::seconds(600));
 

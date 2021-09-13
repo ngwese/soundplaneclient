@@ -72,6 +72,8 @@ public:
   Zone();
   ~Zone() {}
 
+  static Zone presetChromatic();
+
   void newFrame();
   void addTouchToFrame(int i, Touch t);
   void storeAnyNewTouches();

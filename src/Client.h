@@ -35,7 +35,7 @@ typedef enum {
   ageColumn = 4
 } TouchSignalColumns;
 
-const int kSensorFrameQueueSize = 32; // FIXME: this used to be fine at 16
+const int kSensorFrameQueueSize = 32; // FIXME: this used to be fine at 16?
 
 class Client : public SoundplaneDriverListener,
                public MLModel {
@@ -117,6 +117,8 @@ public:
   bool isWithinTrackerCalibrateArea(int i, int j);
   const int getHistoryCtr() { return mHistoryCtr; }
 
+  void setZone(Zone zone);
+  void setZones(std::vector<Zone> zones);
   const std::vector<Zone>::const_iterator getZonesBegin() {
     return mZones.begin();
   }
@@ -132,7 +134,7 @@ private:
   TouchArray mZoneOutputTouches{};
 
   std::unique_ptr<SoundplaneDriver> mpDriver;
-  std::unique_ptr<Queue<SensorFrame>> mSensorFrameQueue;
+  std::unique_ptr<ml::Queue<SensorFrame>> mSensorFrameQueue;
 
   // TODO order!
   void process(time_point<system_clock> now);
@@ -155,6 +157,7 @@ private:
   void endOutputFrame();
 
   void clearZones();
+  void buildZoneIndexMap();
   void sendParametersToZones();
 
   std::vector<Zone> mZones;
