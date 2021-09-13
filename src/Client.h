@@ -25,6 +25,8 @@
 using namespace ml;
 using namespace std::chrono;
 
+namespace soundplane {
+
 Matrix sensorFrameToSignal(const SensorFrame &f);
 
 typedef enum {
@@ -254,5 +256,7 @@ private:
   int mDataRate{100};
   time_point<system_clock> mPrevProcessTouchesTime{};
 };
+
+} // namespace soundplane
 
 #endif // __SOUNDPLANE_CLIENT_H__

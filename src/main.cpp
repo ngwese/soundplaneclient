@@ -8,16 +8,20 @@
 #include "MLProjectInfo.h"
 #include "Zone.h"
 
-int main(int argc, char *argv[]) {
-  MLConsole() << "starting client v" << MLProjectInfo::versionString << "\n";
-  ml::SharedResourcePointer<ml::Timers> t;
-  t->start(true);
+namespace sp = soundplane;
 
-  ConsoleOutput output(1000);
-  Client client(output);
-  client.setZone(Zone::presetChromatic());
+int main(int argc, char *argv[]) {
+  sp::Console() << "starting client v" << MLProjectInfo::versionString << "\n";
+
+  ml::Timers timers;
+  timers.start(true);
+
+  sp::ConsoleOutput output(1000);
+  sp::Client client(output);
+  client.setProperty("max_touches", 8);
+  client.setZone(sp::Zone::presetChromatic());
 
   std::this_thread::sleep_for(std::chrono::seconds(600));
 
-  MLConsole() << "quitting\n";
+  sp::Console() << "quitting\n";
 }

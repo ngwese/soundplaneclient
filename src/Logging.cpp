@@ -1,3 +1,3 @@
 #include "Logging.h"
 
-std::ostream &MLConsole() { return std::cout; }
+std::ostream &soundplane::Console() { return std::cout; }

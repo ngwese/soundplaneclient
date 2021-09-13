@@ -3,6 +3,10 @@
 
 #include <iostream>
 
-std::ostream& MLConsole();
+namespace soundplane {
+
+std::ostream& Console();
+
+}
 
 #endif
