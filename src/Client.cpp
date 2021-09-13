@@ -702,95 +702,35 @@ void Client::clearZones() {
   mZoneIndexMap.fill(-1);
 }
 
-// void Client::loadZonesFromString(const std::string& zoneStr)
-// {
-// 	clearZones();
-// 	cJSON* root = cJSON_Parse(zoneStr.c_str());
-// 	if(!root)
-// 	{
-// 		MLConsole() << "zone file parse failed!\n";
-// 		const char* errStr = cJSON_GetErrorPtr();
-// 		MLConsole() << "    error at: " << errStr << "\n";
-// 		return;
-// 	}
-// 	cJSON* pNode = root->child;
-// 	while(pNode)
-// 	{
-// 		if(!strcmp(pNode->string, "zone"))
-// 		{
-// 			mZones.emplace_back(Zone());
-// 			Zone* pz = &mZones.back();
+void Client::setZone(Zone zone) {
+  std::vector<Zone> zones = { zone };
+  setZones(zones);
+}
 
-// 			cJSON* pZoneType = cJSON_GetObjectItem(pNode, "type");
-// 			if(pZoneType)
-// 			{
-// 				// get zone type and type specific attributes
-// 				pz->mType = pZoneType->valuestring;
-// 			}
-// 			else
-// 			{
-// 				MLConsole() << "No type for zone!\n";
-// 			}
+void Client::setZones(std::vector<Zone> zones) {
+  assert(zones.size() <= kSoundplaneAMaxZones);
+  mOutputEnabled = false;
+  clearZones();
+  mZones = zones;
+  buildZoneIndexMap();
+  mOutputEnabled = true;
+  sendParametersToZones();
+}
 
-// 			// get zone rect in keys
-// 			cJSON* pZoneRect = cJSON_GetObjectItem(pNode, "rect");
-// 			if(pZoneRect)
-// 			{
-// 				int size = cJSON_GetArraySize(pZoneRect);
-// 				if(size == 4)
-// 				{
-// 					int x = cJSON_GetArrayItem(pZoneRect,
-// 0)->valueint; 					int y = cJSON_GetArrayItem(pZoneRect, 1)->valueint; 					int w =
-// cJSON_GetArrayItem(pZoneRect, 2)->valueint; 					int h =
-// cJSON_GetArrayItem(pZoneRect, 3)->valueint; 					pz->setBounds(MLRect(x, y, w,
-// h));
-// 				}
-// 				else
-// 				{
-// 					MLConsole() << "Bad rect for zone!\n";
-// 				}
-// 			}
-// 			else
-// 			{
-// 				MLConsole() << "No rect for zone\n";
-// 			}
-
-// 			pz->mName = TextFragment(getJSONString(pNode, "name"));
-// 			pz->mStartNote = getJSONInt(pNode, "note");
-// 			pz->mOffset = getJSONInt(pNode, "offset");
-// 			pz->mControllerNum1 = getJSONInt(pNode, "ctrl1");
-// 			pz->mControllerNum2 = getJSONInt(pNode, "ctrl2");
-// 			pz->mControllerNum3 = getJSONInt(pNode, "ctrl3");
-
-// 			int zoneIdx = mZones.size() - 1;
-// 			if(zoneIdx < kSoundplaneAMaxZones)
-// 			{
-// 				pz->setZoneID(zoneIdx);
-
-// 				MLRect b(pz->getBounds());
-// 				int x = b.x();
-// 				int y = b.y();
-// 				int w = b.width();
-// 				int h = b.height();
-
-// 				for(int j=y; j < y + h; ++j)
-// 				{
-// 					for(int i=x; i < x + w; ++i)
-// 					{
-// 						mZoneIndexMap(i, j) = zoneIdx;
-// 					}
-// 				}
-// 			}
-// 			else
-// 			{
-// 				MLConsole() << "Client::loadZonesFromString: out
-// of zones!\n";
-// 			}
-// 		}
-// 		pNode = pNode->next;
-// 	}
-// 	sendParametersToZones();
-// }
+void Client::buildZoneIndexMap()
+{
+  unsigned int zoneIdx = 0;
+  for (auto &zone : mZones) {
+    zone.setZoneID(zoneIdx);
+    MLRect b(zone.getBounds());
+    for (int j = b.y(); j < b.y() + b.height(); ++j) {
+      for (int i = b.x(); i < b.x() + b.width(); ++i) {
+        mZoneIndexMap(i, j) = zoneIdx;
+      }
+    }
+    zoneIdx++;
+  }
+}
 
 // copy relevant parameters from Model to zones
 void Client::sendParametersToZones() {

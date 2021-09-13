@@ -29,6 +29,14 @@ Zone::Zone() {
   }
 }
 
+Zone Zone::presetChromatic() {
+  Zone z;
+  z.mName = TextFragment("chromatic");
+  z.mType = Symbol("note_row");
+  z.setBounds(MLRect(0, 0, kSoundplaneAKeyWidth, kSoundplaneAKeyHeight));
+  return z;
+}
+
 void Zone::setBounds(MLRect b) {
   mBounds = b;
   mXRange = MLRange(0., 1., b.left(), b.right());
