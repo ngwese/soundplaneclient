@@ -1,9 +1,6 @@
 [submodule "dep/soundplanelib"]
 	path = dep/soundplanelib
 	url = git@github.com:ngwese/soundplanelib.git
-[submodule "dep/soundplane"]
-	path = dep/soundplane
-	url = git@github.com:ngwese/soundplane.git
 [submodule "dep/madronalib"]
 	path = dep/madronalib
 	url = https://github.com/madronalabs/madronalib.git
