@@ -8,7 +8,7 @@
 #include "SensorFrame.h"
 #include "Touch.h"
 
-using namespace std::chrono;
+namespace soundplane {
 
 class TouchTracker {
 public:
@@ -27,7 +27,7 @@ public:
   // history of many filters.
   TouchArray process(const SensorFrame &in, int maxTouches);
 
-  TouchArray getTestTouches(time_point<system_clock> t, int maxTouches);
+  TouchArray getTestTouches(std::chrono::time_point<std::chrono::system_clock> t, int maxTouches);
 
 private:
   float mSampleRate;
@@ -61,3 +61,5 @@ private:
   TouchArray clampAndScaleTouches(const TouchArray &x);
   void outputTouches(TouchArray touches);
 };
+
+} // namespace soundplane

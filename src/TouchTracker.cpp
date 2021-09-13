@@ -13,6 +13,10 @@
 #include <thread>
 
 #include "TouchTracker.h"
+
+using namespace std::chrono;
+using namespace soundplane;
+
 constexpr float kTwoPi = 3.1415926535f * 2.f;
 
 template <class c> inline c(clamp)(const c &x, const c &min, const c &max) {

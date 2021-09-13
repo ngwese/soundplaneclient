@@ -8,6 +8,8 @@
 
 #include "Zone.h"
 
+using namespace soundplane;
+
 const float kVibratoFilterFreq = 12.0f;
 const float kSoundplaneVibratoAmount = 5.;
 
@@ -220,7 +222,10 @@ void Zone::processTouchesNoteRow(const std::bitset<kMaxTouches> &freedTouches) {
                                 .y = t1y,
                                 .z = t1z,
                                 .dz = t1dz,
+                                .age = 0,
                                 .state = kTouchStateOn,
+                                .kx = 0,
+                                .ky = 0,
                                 .note = note};
     } else if (isActive) {
       // filter ongoing note
@@ -236,7 +241,10 @@ void Zone::processTouchesNoteRow(const std::bitset<kMaxTouches> &freedTouches) {
                                 .y = t1y,
                                 .z = t1z,
                                 .dz = t1dz,
+                                .age = 0,
                                 .state = kTouchStateContinue,
+                                .kx = 0,
+                                .ky = 0,
                                 .note = note,
                                 .vibrato = vibratoHP};
     }
@@ -340,7 +348,10 @@ void Zone::processTouchesNoteOffs(std::bitset<kMaxTouches> &freedTouches) {
                                   .y = t2.y,
                                   .z = t2.z,
                                   .dz = t2.dz,
+                                  .age = 0,
                                   .state = kTouchStateOff,
+                                  .kx = 0,
+                                  .ky = 0,
                                   .note = note};
       }
     }

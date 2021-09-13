@@ -10,7 +10,7 @@ include_directories("${SPLIB_SOURCE_DIR}/source")
 # the static library and headers for now the code is directly added as a subdir
 # and here we add the internal source dirs to find the headers.
 include_directories(${MLLIB_SOURCE_DIR}/external/aes256)
-include_directories(${MLLIB_SOURCE_DIR}/external/cJSON)
+# include_directories(${MLLIB_SOURCE_DIR}/external/cJSON)
 include_directories(${MLLIB_SOURCE_DIR}/external/ffft)
 include_directories(${MLLIB_SOURCE_DIR}/external/utf)
 include_directories(${MLLIB_SOURCE_DIR}/external/sse2neon)
@@ -25,16 +25,7 @@ include_directories(${MLLIB_SOURCE_DIR}/source/procs)
 
 include_directories(${MLLIB_SOURCE_DIR}/include)
 
-# FIXME:
-# include_directories("${SPCLIENT_SOURCE_DIR}/Source")
-# include_directories("${SPCLIENT_SOURCE_DIR}/ml-juce/JuceApp")
-# include_directories("${SPCLIENT_SOURCE_DIR}/ml-juce/deprecated")
-# include_directories("${SPCLIENT_SOURCE_DIR}/external/juce")
-
 set(SOURCE_FILES
-# "${SPCLIENT_SOURCE_DIR}/Source/TouchTracker.cpp"
-# "${SPCLIENT_SOURCE_DIR}/Source/Zone.cpp"
-# "${SPCLIENT_SOURCE_DIR}/Source/SoundplaneModel.cpp"
   # ml altered
   MLDSPDeprecated.cpp
   MLVectorDeprecated.cpp

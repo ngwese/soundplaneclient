@@ -9,6 +9,8 @@
 
 #include <array>
 
+namespace soundplane {
+
 static constexpr int kMaxTouches = 16;
 
 enum TouchState {
@@ -41,3 +43,5 @@ struct Touch {
 typedef std::array<Touch, kMaxTouches> TouchArray;
 
 inline bool touchIsActive(Touch t) { return t.state != kTouchStateInactive; }
+
+} // namespace soundplane

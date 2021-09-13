@@ -6,6 +6,8 @@
 #include "Touch.h"
 #include "Zone.h"
 
+namespace soundplane {
+
 class Output {
   public:
   virtual void beginOutputFrame(std::chrono::time_point<std::chrono::system_clock> now) = 0;
@@ -22,5 +24,7 @@ class Output {
 
   virtual void doInfrequentTasks() {};
 };
+
+} // namespace soundplane
 
 #endif

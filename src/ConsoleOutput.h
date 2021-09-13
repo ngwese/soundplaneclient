@@ -5,6 +5,7 @@
 
 #include "Output.h"
 
+namespace soundplane {
 class ConsoleOutput : public Output {
 public:
   ConsoleOutput(unsigned int interval) : mOutputInterval(interval), mFrames(0) {};
@@ -20,5 +21,7 @@ private:
   unsigned int mFrames;
   std::chrono::time_point<std::chrono::system_clock> mIntervalStart;
 };
+
+} // namespace soundplane
 
 #endif

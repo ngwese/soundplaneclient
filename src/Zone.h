@@ -17,19 +17,14 @@
 #include "MLParameter.h"
 #include "MLSymbol.h"
 #include "MLVectorDeprecated.h"
-// #include "MLFileCollection.h"
 
 #include <bitset>
 #include <list>
 #include <map>
 
-#include "cJSON.h"
-
-// #include "NetService.h"
-// #include "NetServiceBrowser.h"
+namespace soundplane {
 
 // Zone messages - currently used only for Controllers. TODO use for touches?
-
 struct ZoneMessage {
   Symbol name{};
   Symbol type{};
@@ -164,3 +159,5 @@ private:
   std::vector<MLBiquad> mNoteFilters;
   std::vector<MLBiquad> mVibratoFilters;
 };
+
+} // namespace soundplane

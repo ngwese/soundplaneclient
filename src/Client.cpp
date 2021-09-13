@@ -11,6 +11,8 @@
 
 #include "Logging.h"
 
+using namespace soundplane;
+
 const int kModelDefaultCarriersSize = 40;
 const unsigned char kModelDefaultCarriers[kModelDefaultCarriersSize] = {
   // 40 default carriers.  avoiding 32 (gets aliasing from 16)
@@ -138,7 +140,7 @@ Client::~Client() {
 
   if (mProcessThread.joinable()) {
     mProcessThread.join();
-    MLConsole() << "Client: mProcessThread terminated.\n";
+    Console() << "Client: mProcessThread terminated.\n";
   }
 
   mpDriver = nullptr;
@@ -146,7 +148,7 @@ Client::~Client() {
 
 void Client::doPropertyChangeAction(ml::Symbol p,
                                              const ml::Value &newVal) {
-  MLConsole() << "Client::doPropertyChangeAction: " << p << " -> " <<
+  Console() << "Client::doPropertyChangeAction: " << p << " -> " <<
   newVal << "\n";
 
   int propertyType = newVal.getType();
@@ -224,7 +226,7 @@ void Client::doPropertyChangeAction(ml::Symbol p,
     }
     else if (p == "test_touches") {
       bool b = v;
-      MLConsole() << "test touches: " << b << "\n";
+      Console() << "test touches: " << b << "\n";
       mTestTouchesOn = b;
       mSensorFrameQueue->clear();
       mRequireSendNextFrame = true;
@@ -251,15 +253,15 @@ void Client::doPropertyChangeAction(ml::Symbol p,
 }
 
 void Client::onStartup() {
-  MLConsole() << "onStartup() called\n";
+  Console() << "onStartup() called\n";
   // get serial number and auto calibrate noise on sync detect
   const unsigned long instrumentModel = 1; // Soundplane A
   mSerialNumber = mpDriver->getSerialNumber();
 
-  MLConsole() << "     state: " << mpDriver->getDeviceState() << "\n";
-  MLConsole() << "  firmware: " << mpDriver->getFirmwareVersion() << "\n";
-  MLConsole() << "    serial: " << mSerialNumber << "\n";
-  MLConsole() << "  carriers: " << mpDriver->getCarriers() << "\n";
+  Console() << "     state: " << mpDriver->getDeviceState() << "\n";
+  Console() << "  firmware: " << mpDriver->getFirmwareVersion() << "\n";
+  Console() << "    serial: " << mSerialNumber << "\n";
+  Console() << "  carriers: " << mpDriver->getCarriers() << "\n";
 
   // connected but not calibrated -- disable output.
   enableOutput(false);
@@ -278,36 +280,36 @@ void Client::onFrame(const SensorFrame &frame) {
 void Client::onError(int error, const char *errStr) {
   switch (error) {
   case kDevDataDiffTooLarge:
-    MLConsole() << "error: frame difference too large: " << errStr << "\n";
+    Console() << "error: frame difference too large: " << errStr << "\n";
     beginCalibrate();
     break;
   case kDevGapInSequence:
     if (mVerbose) {
-      MLConsole() << "note: gap in sequence " << errStr << "\n";
+      Console() << "note: gap in sequence " << errStr << "\n";
     }
     break;
   case kDevReset:
     if (mVerbose) {
-      MLConsole() << "isoch stalled, resetting " << errStr << "\n";
+      Console() << "isoch stalled, resetting " << errStr << "\n";
     }
     break;
   case kDevPayloadFailed:
     if (mVerbose) {
-      MLConsole() << "payload failed at sequence " << errStr << "\n";
+      Console() << "payload failed at sequence " << errStr << "\n";
     }
     break;
   case kDevNoInterface:
-    MLConsole() << "error: could not create device interface: " << errStr
+    Console() << "error: could not create device interface: " << errStr
                 << "\n";
     break;
   case kDevInsufficientPower:
-    MLConsole() << "error: insufficient USB power: " << errStr << "\n";
+    Console() << "error: insufficient USB power: " << errStr << "\n";
     break;
   case kDevUnableToOpenDevice:
-    MLConsole() << "error: unable to open device: " << errStr << "\n";
+    Console() << "error: unable to open device: " << errStr << "\n";
     break;
   default:
-    MLConsole() << "unknown error: " << errStr << "\n";
+    Console() << "unknown error: " << errStr << "\n";
 
     break;
   }
@@ -335,7 +337,7 @@ void Client::processThread() {
     if (mProcessCounter >= 1000) {
       if (mVerbose) {
         if (mMaxRecentQueueSize >= kSensorFrameQueueSize) {
-          MLConsole() << "warning: input queue full; " << debugFirstQueueFull << " of 1000\n";
+          Console() << "warning: input queue full; " << debugFirstQueueFull << " of 1000\n";
         }
       }
 
@@ -393,7 +395,7 @@ void Client::process(time_point<system_clock> now) {
 
           TouchArray touches = trackTouches(mCalibratedFrame);
           outputTouches(touches, now);
-          // MLConsole() << ".";
+          // Console() << ".";
         }
       }
     }
@@ -443,7 +445,7 @@ void Client::sendTouchesToZones(TouchArray touches) {
     float y = touches[i].y;
 
     if (touchIsActive(touches[i])) {
-      // MLConsole() << i << ":" << age << "\n";
+      // Console() << i << ":" << age << "\n";
       // get fractional key grid position (Soundplane A)
       Vec2 keyXY(x, y);
 
@@ -515,19 +517,19 @@ void Client::dumpOutputsByZone() {
     // send messages to outputs about each zone
     for (auto &zone : mZones) {
 
-      MLConsole() << "[zone " << zc++ << ": ";
+      Console() << "[zone " << zc++ << ": ";
 
       // touches
       for (int i = 0; i < kMaxTouches; ++i) {
         Touch t = zone.mOutputTouches[i];
         if (touchIsActive(t)) {
-          MLConsole() << i << ":" << t.state << ":" << t.z << " ";
+          Console() << i << ":" << t.state << ":" << t.z << " ";
         }
       }
 
-      MLConsole() << "]";
+      Console() << "]";
     }
-    MLConsole() << "\n";
+    Console() << "\n";
   }
 }
 
@@ -822,10 +824,10 @@ void Client::doInfrequentTasks() {
 
   if (getDeviceState() == kDeviceHasIsochSync) {
     if (mCarrierMaskDirty) {
-      MLConsole() << "mCarrierMaskDirty: calling enableCarriers()\n";
+      Console() << "mCarrierMaskDirty: calling enableCarriers()\n";
       enableCarriers(mCarriersMask);
     } else if (mNeedsCarriersSet) {
-      MLConsole() << "mNeedsCarriersSet: calling setCarriers() and triggering calibration\n";
+      Console() << "mNeedsCarriersSet: calling setCarriers() and triggering calibration\n";
       mNeedsCarriersSet = false;
       if (mDoOverrideCarriers) {
         setCarriers(mOverrideCarriers);
@@ -835,14 +837,14 @@ void Client::doInfrequentTasks() {
 
       mNeedsCalibrate = true;
     } else if (mNeedsCalibrate && (!mSelectingCarriers)) {
-      MLConsole() << "mNeedsCalibrate: calling beginCalibrate()\n";
+      Console() << "mNeedsCalibrate: calling beginCalibrate()\n";
       mNeedsCalibrate = false;
       beginCalibrate();
     }
   }
 
   if (mCalibrating) {
-    MLConsole() << "Client::doInfrequentTasks(): calib progress = " << getCalibrateProgress() << "\n";
+    Console() << "Client::doInfrequentTasks(): calib progress = " << getCalibrateProgress() << "\n";
   }
 }
 
@@ -869,11 +871,11 @@ int Client::enableCarriers(unsigned long mask) {
 }
 
 void Client::dumpCarriers(const SoundplaneDriver::Carriers &carriers) {
-  MLConsole() << "\n------------------\n";
-  MLConsole() << "carriers: \n";
+  Console() << "\n------------------\n";
+  Console() << "carriers: \n";
   for (int i = 0; i < kSoundplaneNumCarriers; ++i) {
     int c = carriers[i];
-    MLConsole() << i << ": " << c << " [" << carrierToFrequency(c) << "Hz] \n";
+    Console() << i << ": " << c << " [" << carrierToFrequency(c) << "Hz] \n";
   }
 }
 
@@ -889,7 +891,7 @@ void Client::clear() { mTracker.clear(); }
 //
 void Client::beginCalibrate() {
   if (getDeviceState() == kDeviceHasIsochSync) {
-    MLConsole() << "Client::beginCalibrate: getDeviceState() == kDeviceHasIsochSync; starting calibration\n";
+    Console() << "Client::beginCalibrate: getDeviceState() == kDeviceHasIsochSync; starting calibration\n";
     mStats.clear();
     mCalibrating = true;
   }
@@ -898,7 +900,7 @@ void Client::beginCalibrate() {
 // called by process routine when enough samples have been collected.
 //
 void Client::endCalibrate() {
-  MLConsole() << "Client::endCalibrate() called\n";
+  Console() << "Client::endCalibrate() called\n";
   SensorFrame mean = clamp(mStats.mean(), 0.0001f, 1.f);
   mCalibrateMeanInv = divide(fill(1.f), mean);
   mCalibrating = false;
@@ -929,7 +931,7 @@ void Client::beginSelectCarriers() {
     mMaxNoiseFreqByCarrierSet.clear();
 
     // setup first set of carrier frequencies
-    MLConsole() << "testing carriers set " << mSelectCarriersStep << "...\n";
+    Console() << "testing carriers set " << mSelectCarriersStep << "...\n";
     makeStandardCarrierSet(mCarriers, mSelectCarriersStep);
     setCarriers(mCarriers);
   }
@@ -973,14 +975,14 @@ void Client::nextSelectCarriersStep() {
   mMaxNoiseByCarrierSet[mSelectCarriersStep] = maxVar;
   mMaxNoiseFreqByCarrierSet[mSelectCarriersStep] = maxVarFreq;
 
-  MLConsole() << "max noise for set " << mSelectCarriersStep << ": " << maxVar
+  Console() << "max noise for set " << mSelectCarriersStep << ": " << maxVar
               << "(" << maxVarFreq << " Hz) \n";
 
   // set up next step.
   mSelectCarriersStep++;
   if (mSelectCarriersStep < kStandardCarrierSets) {
     // set next carrier frequencies to calibrate.
-    MLConsole() << "testing carriers set " << mSelectCarriersStep << "...\n";
+    Console() << "testing carriers set " << mSelectCarriersStep << "...\n";
     makeStandardCarrierSet(mCarriers, mSelectCarriersStep);
     setCarriers(mCarriers);
   } else {
@@ -995,12 +997,12 @@ void Client::endSelectCarriers() {
   // get minimum of collected noise sums
   float minNoise = 99999.f;
   int minIdx = -1;
-  MLConsole() << "------------------------------------------------\n";
-  MLConsole() << "carrier select noise results:\n";
+  Console() << "------------------------------------------------\n";
+  Console() << "carrier select noise results:\n";
   for (int i = 0; i < kStandardCarrierSets; ++i) {
     float n = mMaxNoiseByCarrierSet[i];
     float h = mMaxNoiseFreqByCarrierSet[i];
-    MLConsole() << "set " << i << ": max noise " << n << "(" << h << " Hz)\n";
+    Console() << "set " << i << ": max noise " << n << "(" << h << " Hz)\n";
     if (n < minNoise) {
       minNoise = n;
       minIdx = i;
@@ -1008,7 +1010,7 @@ void Client::endSelectCarriers() {
   }
 
   // set that carrier group
-  MLConsole() << "setting carriers set " << minIdx << "...\n";
+  Console() << "setting carriers set " << minIdx << "...\n";
   makeStandardCarrierSet(mCarriers, minIdx);
   setCarriers(mCarriers);
 
@@ -1019,7 +1021,7 @@ void Client::endSelectCarriers() {
     cSig[car] = mCarriers[car];
   }
   setProperty("carriers", cSig);
-  MLConsole() << "carrier select done.\n";
+  Console() << "carrier select done.\n";
 
   mSelectingCarriers = false;
   mNeedsCalibrate = true;
