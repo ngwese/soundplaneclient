@@ -7,9 +7,10 @@
 
 namespace MLProjectInfo {
 const char *const makerName = "Madrona Labs";
-const char *const projectName = "Soundplane";
-const char *const versionString = "1.8.5";
-const int versionNumber = 0x010805;
+const char *const projectName = "soundplaneclient";
+const char *const versionString = "0.1 (1.8.5)";
+// const int versionNumber = 0x010805;
+const int versionNumber = 0x000001;
 } // namespace MLProjectInfo
 
 #endif // __ML_PROJECT_INFO_H__

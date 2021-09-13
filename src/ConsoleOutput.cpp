@@ -4,17 +4,34 @@
 #include "Logging.h"
 
 void ConsoleOutput::beginOutputFrame(time_point<system_clock> now) {
-  MLConsole() << "begin: " /*<< now*/ << std::endl;
+  if (mFrames == 0) {
+    mIntervalStart = std::chrono::system_clock::now();
+  }
+
+  mFrames++;
+
+  if (mFrames % mOutputInterval == 0) {
+    auto now = std::chrono::system_clock::now();
+    auto elapsed = std::chrono::duration_cast<seconds>(now - mIntervalStart).count();
+    MLConsole() << "begin[" << mFrames << "], " << mOutputInterval / elapsed << " fr/sec" << std::endl;
+    mIntervalStart = now;
+  }
 }
 
 void ConsoleOutput::processTouch(int i, int offset, const Touch &t) {
-  MLConsole() << "   t: " << i << " " << offset /*<< " " << t*/ << std::endl;
+  if (mFrames % mOutputInterval == 0) {
+    MLConsole() << "   t: " << i << " " << offset /*<< " " << t*/ << std::endl;
+  }
 }
 
 void ConsoleOutput::processController(int zoneID, int offset, const ZoneMessage &m) {
-  MLConsole() << "   c: " << zoneID << " " << offset /*<< " " << m*/ << std::endl;
+  if (mFrames % mOutputInterval == 0) {
+    MLConsole() << "   c: " << zoneID << " " << offset /*<< " " << m*/ << std::endl;
+  }
 }
 
 void ConsoleOutput::endOutputFrame() {
-  MLConsole() << "end" << std::endl;
+  if (mFrames % mOutputInterval == 0) {
+    MLConsole() << "end" << std::endl;
+  }
 }

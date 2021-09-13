@@ -13,17 +13,11 @@
 
 const int kModelDefaultCarriersSize = 40;
 const unsigned char kModelDefaultCarriers[kModelDefaultCarriersSize] = {
-    // 40 default carriers.  avoiding 32 (gets aliasing from 16)
-    3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16,
-    17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-    31, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43};
-
-// std::string makeDefaultServiceName()
-// {
-// 	std::stringstream nameStream;
-// 	nameStream << "default" << " (" << kDefaultUDPPort << ")";
-// 	return nameStream.str();
-// }
+  // 40 default carriers.  avoiding 32 (gets aliasing from 16)
+  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16,
+  17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+  31, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43
+};
 
 // make one of the possible standard carrier sets, skipping a range of carriers
 // out of the middle of the 40 defaults.
@@ -83,20 +77,18 @@ SensorFrame signalToSensorFrame(const ml::Matrix &in) {
 //
 #pragma mark Client
 
-Client::Client()
-    : mOutputEnabled(false),
-      mSurface(SensorGeometry::width, SensorGeometry::height),
-      mRawSignal(SensorGeometry::width, SensorGeometry::height),
-      mCalibratedSignal(SensorGeometry::width, SensorGeometry::height),
-      mSmoothedSignal(SensorGeometry::width, SensorGeometry::height),
+Client::Client(Output &output)
+    : mOutputEnabled(false), mOutput(output),
+      // mSurface(SensorGeometry::width, SensorGeometry::height),
+      // mRawSignal(SensorGeometry::width, SensorGeometry::height),
+      // mCalibratedSignal(SensorGeometry::width, SensorGeometry::height),
+      // mSmoothedSignal(SensorGeometry::width, SensorGeometry::height),
       mCalibrating(false), mTestTouchesOn(false), mTestTouchesWasOn(false),
       mSelectingCarriers(false), mHasCalibration(false),
       mZoneIndexMap(kSoundplaneAKeyWidth, kSoundplaneAKeyHeight),
       mHistoryCtr(0), mCarrierMaskDirty(false), mNeedsCarriersSet(false),
       mNeedsCalibrate(false), mLastInfrequentTaskTime(0),
       mCarriersMask(0xFFFFFFFF), mDoOverrideCarriers(false)
-// mKymaIsConnected(0),
-// mKymaMode(false)
 {
   mpDriver = SoundplaneDriver::create(*this);
 
@@ -113,14 +105,9 @@ Client::Client()
   clearZones();
   setAllPropertiesToDefaults();
 
-  // MLConsole() << "Client: listening for OSC on port " <<
-  // kDefaultUDPReceivePort << "...\n"; listenToOSC(kDefaultUDPReceivePort);
-
-  // mMIDIOutput.initialize();
-
-  mTouchFrame.setDims(kSoundplaneTouchWidth, kMaxTouches);
-  mTouchHistory.setDims(kSoundplaneTouchWidth, kMaxTouches,
-                        kSoundplaneHistorySize);
+  // mTouchFrame.setDims(kSoundplaneTouchWidth, kMaxTouches);
+  // mTouchHistory.setDims(kSoundplaneTouchWidth, kMaxTouches,
+  //                       kSoundplaneHistorySize);
 
   // make zone presets collection
   // File zoneDir = getDefaultFileLocation(kPresetFiles,
@@ -154,8 +141,6 @@ Client::~Client() {
     MLConsole() << "Client: mProcessThread terminated.\n";
   }
 
-  // listenToOSC(0);
-
   mpDriver = nullptr;
 }
 
@@ -181,7 +166,6 @@ void Client::doPropertyChangeAction(ml::Symbol p,
       mCarriersMask = mask;
       mCarrierMaskDirty = true; // trigger carriers set in a second or so
     }
-
     else if (p == "all_toggle") {
       bool on = (bool)(v);
       for (int i = 0; i < 32; ++i) {
@@ -191,90 +175,54 @@ void Client::doPropertyChangeAction(ml::Symbol p,
       }
       mCarriersMask = on ? ~0 : 0;
       mCarrierMaskDirty = true; // trigger carriers set in a second or so
-    } else if (p == "max_touches") {
-      mMaxTouches = v;
-      // mMIDIOutput.setMaxTouches(v);
-      // mOSCOutput.setMaxTouches(v);
-    } else if (p == "lopass_z") {
-      mTracker.setLopassZ(v);
-    } else if (p == "z_thresh") {
-      mTracker.setThresh(v);
-    } else if (p == "snap") {
-      sendParametersToZones();
-    } else if (p == "vibrato") {
-      sendParametersToZones();
-    } else if (p == "lock") {
-      sendParametersToZones();
-    } else if (p == "data_rate") {
-      mDataRate = v;
-      // mOSCOutput.setDataRate(v);
-      // mMIDIOutput.setDataRate(v);
     }
-    // else if (p == "midi_active")
-    // {
-    // 	mMIDIOutput.setActive(bool(v));
-    // }
-    // else if (p == "midi_mpe")
-    // {
-    // 	mMIDIOutput.setMPE(bool(v));
-    // }
-    // else if (p == "midi_mpe_extended")
-    // {
-    // 	mMIDIOutput.setMPEExtended(bool(v));
-    // }
-    // else if (p == "midi_channel")
-    // {
-    // 	mMIDIOutput.setStartChannel(int(v));
-    // }
-    // else if (p == "midi_pressure_active")
-    // {
-    // 	mMIDIOutput.setPressureActive(bool(v));
-    // }
-    // else if (p == "osc_active")
-    // {
-    // 	bool b = v;
-    // 	mOSCOutput.setActive(b);
-    // }
-    // else if (p == "osc_send_matrix")
-    // {
-    // 	bool b = v;
-    // 	mSendMatrixData = b;
-    // }
+    else if (p == "max_touches") {
+      mMaxTouches = v;
+      mOutput.setMaxTouches(v);
+    }
+    else if (p == "lopass_z") {
+      mTracker.setLopassZ(v);
+    }
+    else if (p == "z_thresh") {
+      mTracker.setThresh(v);
+    }
+    else if (p == "snap") {
+      sendParametersToZones();
+    }
+    else if (p == "vibrato") {
+      sendParametersToZones();
+    }
+    else if (p == "lock") {
+      sendParametersToZones();
+    }
+    else if (p == "data_rate") {
+      mDataRate = v;
+      mOutput.setDataRate(v);
+    }
     else if (p == "quantize") {
       sendParametersToZones();
-    } else if (p == "rotate") {
+    }
+    else if (p == "rotate") {
       bool b = v;
       mTracker.setRotate(b);
     }
-    // else if (p == "glissando")
-    // {
-    // 	mMIDIOutput.setGlissando(bool(v));
-    // 	sendParametersToZones();
-    // }
-    // else if (p == "hysteresis")
-    // {
-    // 	mMIDIOutput.setHysteresis(v);
-    // 	sendParametersToZones();
-    // }
     else if (p == "transpose") {
       sendParametersToZones();
     }
-    // else if (p == "bend_range")
-    // {
-    // 	mMIDIOutput.setBendRange(v);
-    // 	sendParametersToZones();
-    // }
     else if (p == "verbose") {
       bool b = v;
       mVerbose = b;
-    } else if (p == "override_carriers") {
+    }
+    else if (p == "override_carriers") {
       bool b = v;
       mDoOverrideCarriers = b;
       mNeedsCarriersSet = true;
-    } else if (p == "override_carrier_set") {
+    }
+    else if (p == "override_carrier_set") {
       makeStandardCarrierSet(mOverrideCarriers, v);
       mNeedsCarriersSet = true;
-    } else if (p == "test_touches") {
+    }
+    else if (p == "test_touches") {
       bool b = v;
       MLConsole() << "test touches: " << b << "\n";
       mTestTouchesOn = b;
@@ -282,95 +230,8 @@ void Client::doPropertyChangeAction(ml::Symbol p,
       mRequireSendNextFrame = true;
     }
   } break;
-  case ml::Value::kTextValue: {
-    // TODO clean up, use text for everything
-    ml::Text strText = newVal.getTextValue();
-    std::string str(strText.getText());
-
-    // 	if(p == "osc_service_name")
-    // 	{
-    // 		mOSCOutput.clear();
-
-    // 		// we only save the formatted service name.
-    // 		std::string serviceName = unformatServiceName(str);
-    // 		std::string hostName =
-    // MLNetServiceHub::getHostName(serviceName);
-
-    // 		if(hostName == "")
-    // 		{
-    // 			// wait a bit for service to be resolved on startup
-    // 			time_point<system_clock> waitStartTime =
-    // system_clock::now(); 			bool stopWaiting = false; 			while(hostName == "" &&
-    // !stopWaiting)
-    // 			{
-    // 				std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    // 				time_point<system_clock> now =
-    // system_clock::now(); 				int waitDuration = duration_cast<milliseconds>(now -
-    // waitStartTime).count(); 				if(waitDuration > 2000) stopWaiting = true;
-    // 				hostName =
-    // MLNetServiceHub::getHostName(serviceName);
-    // 			}
-    // 		}
-
-    // 		if(hostName == "")
-    // 		{
-    // 			MLConsole() << "OSC service not resolved: falling back to
-    // default\n"; 			hostName = "localhost"; 			serviceName = "default";
-
-    // 			std::string defaultService = makeDefaultServiceName();
-    // 			setProperty("osc_service_name", defaultService.c_str());
-    // 		}
-
-    // 		int port = MLNetServiceHub::getPort(serviceName);
-    // 		mOSCOutput.setHostName(hostName);
-    // 		mOSCOutput.setPort(port);
-    // 		mOSCOutput.reconnect();
-    // 	}
-    // 	if (p == "viewmode")
-    // 	{
-    // 		// nothing to do for Model
-    // 	}
-    // 	else if (p == "midi_device")
-    // 	{
-    // 		mMIDIOutput.setDevice(str);
-    // 	}
-    // 	else if (p == "zone_JSON")
-    // 	{
-    // 		loadZonesFromString(str);
-    // 	}
-    // 	else if (p == "zone_preset")
-    // 	{
-    // 		// look for built in zone map names.
-    // 		if(str == "chromatic")
-    // 		{
-    // 			setProperty("zone_JSON",
-    // (SoundplaneBinaryData::chromatic_json));
-    // 		}
-    // 		else if(str == "rows in fourths")
-    // 		{
-    // 			setProperty("zone_JSON",
-    // (SoundplaneBinaryData::rows_in_fourths_json));
-    // 		}
-    // 		else if(str == "rows in octaves")
-    // 		{
-    // 			setProperty("zone_JSON",
-    // (SoundplaneBinaryData::rows_in_octaves_json));
-    // 		}
-    // 		// if not built in, load a zone map file.
-    // 		else
-    // 		{
-    // 			const MLFile& f = mZonePresets->getFileByPath(str);
-    // 			if(f.exists())
-    // 			{
-    // 				File zoneFile = f.getJuceFile();
-    // 				String stateStr(zoneFile.loadFileAsString());
-    // 				setPropertyImmediate("zone_JSON",
-    // (stateStr.toUTF8()));
-    // 			}
-    // 		}
-    // 	}
-    // }
-  } break;
+  case ml::Value::kTextValue:
+    break;
   case ml::Value::kMatrixValue: {
     const ml::Matrix &sig = newVal.getMatrixValue();
     if (p == ml::Symbol("carriers")) {
@@ -393,11 +254,11 @@ void Client::onStartup() {
   MLConsole() << "onStartup() called\n";
   // get serial number and auto calibrate noise on sync detect
   const unsigned long instrumentModel = 1; // Soundplane A
-  // mOSCOutput.setSerialNumber((instrumentModel << 16) |
-  // mpDriver->getSerialNumber());
+  mSerialNumber = mpDriver->getSerialNumber();
+
   MLConsole() << "     state: " << mpDriver->getDeviceState() << "\n";
   MLConsole() << "  firmware: " << mpDriver->getFirmwareVersion() << "\n";
-  MLConsole() << "    serial: " << mpDriver->getSerialNumber() << "\n";
+  MLConsole() << "    serial: " << mSerialNumber << "\n";
   MLConsole() << "  carriers: " << mpDriver->getCarriers() << "\n";
 
   // connected but not calibrated -- disable output.
@@ -458,6 +319,7 @@ void Client::processThread() {
   time_point<system_clock> previous, now;
   previous = now = system_clock::now();
   mPrevProcessTouchesTime = now; // TODO interval timer object
+  static unsigned int debugFirstQueueFull = 0;
 
   while (!mTerminating) {
     now = system_clock::now();
@@ -467,17 +329,19 @@ void Client::processThread() {
     size_t queueSize = mSensorFrameQueue->elementsAvailable();
     if (queueSize > mMaxRecentQueueSize) {
       mMaxRecentQueueSize = queueSize;
+      debugFirstQueueFull = mProcessCounter;
     }
 
     if (mProcessCounter >= 1000) {
       if (mVerbose) {
         if (mMaxRecentQueueSize >= kSensorFrameQueueSize) {
-          MLConsole() << "warning: input queue full \n";
+          MLConsole() << "warning: input queue full; " << debugFirstQueueFull << " of 1000\n";
         }
       }
 
       mProcessCounter = 0;
       mMaxRecentQueueSize = 0;
+      debugFirstQueueFull = 0;
     }
 
     // sleep, less than one frame interval
@@ -503,13 +367,13 @@ void Client::process(time_point<system_clock> now) {
     outputTouches(touches, now);
   } else {
     if (mSensorFrameQueue->pop(mSensorFrame)) {
-      mSurface = sensorFrameToSignal(mSensorFrame);
+      /// mSurface = sensorFrameToSignal(mSensorFrame);
 
       // store surface for raw output
-      {
-        std::lock_guard<std::mutex> lock(mRawSignalMutex);
-        mRawSignal.copy(mSurface);
-      }
+      // {
+      //   std::lock_guard<std::mutex> lock(mRawSignalMutex);
+      //   mRawSignal.copy(mSurface);
+      // }
 
       if (mCalibrating) {
         mStats.accumulate(mSensorFrame);
@@ -529,6 +393,7 @@ void Client::process(time_point<system_clock> now) {
 
           TouchArray touches = trackTouches(mCalibratedFrame);
           outputTouches(touches, now);
+          // MLConsole() << ".";
         }
       }
     }
@@ -537,8 +402,6 @@ void Client::process(time_point<system_clock> now) {
 
 void Client::outputTouches(TouchArray touches,
                            time_point<system_clock> now) {
-  saveTouchHistory(touches);
-
   // let Zones process touches. This is always done at the controller's frame
   // rate.
   sendTouchesToZones(touches);
@@ -690,61 +553,41 @@ void Client::sendFrameToOutputs(time_point<system_clock> now) {
     }
   }
 
-  // send optional calibrated matrix to OSC output
-  if (mSendMatrixData) {
-    ml::Matrix calibratedPressure = getCalibratedSignal();
-    if (calibratedPressure.getHeight() == SensorGeometry::height) {
-      // send to OSC output only
-      // mOSCOutput.processMatrix(calibratedPressure);
-    }
-  }
+  // send optional calibrated matrix if enabled
+  // if (mSendMatrixData) {
+  //   ml::Matrix calibratedPressure = getCalibratedSignal();
+  //   if (calibratedPressure.getHeight() == SensorGeometry::height) {
+  //     mOutput.processMatrix(calibratedPressure);
+  //   }
+  // }
 
   endOutputFrame();
 }
 
 void Client::beginOutputFrame(time_point<system_clock> now) {
-  // if(mMIDIOutput.isActive())
-  // {
-  // 	mMIDIOutput.beginOutputFrame(now);
-  // }
-  // if(mOSCOutput.isActive())
-  // {
-  // 	mOSCOutput.beginOutputFrame(now);
-  // }
+  if (mOutput.isActive()) {
+    mOutput.beginOutputFrame(now);
+  }
 }
 
 void Client::sendTouchToOutputs(int i, int offset, const Touch &t) {
-  // if(mMIDIOutput.isActive())
-  // {
-  // 	mMIDIOutput.processTouch(i, offset, t);
-  // }
-  // if(mOSCOutput.isActive())
-  // {
-  // 	mOSCOutput.processTouch(i, offset, t);
-  // }
+  if (mOutput.isActive()) {
+    mOutput.processTouch(i, offset, t);
+  }
 }
 
 void Client::sendControllerToOutputs(int zoneID, int offset,
                                               const ZoneMessage &m) {
-  // if(mMIDIOutput.isActive())
-  // {
-  // 	mMIDIOutput.processController(zoneID, offset, m);
-  // }
-  // if(mOSCOutput.isActive())
-  // {
-  // 	mOSCOutput.processController(zoneID, offset, m);
-  // }
+  if (mOutput.isActive()) {
+    mOutput.processController(zoneID, offset, m);
+  }
+
 }
 
 void Client::endOutputFrame() {
-  // if(mMIDIOutput.isActive())
-  // {
-  // 	mMIDIOutput.endOutputFrame();
-  // }
-  // if(mOSCOutput.isActive())
-  // {
-  // 	mOSCOutput.endOutputFrame();
-  // }
+  if (mOutput.isActive()) {
+    mOutput.endOutputFrame();
+  }
 }
 
 void Client::setAllPropertiesToDefaults() {
@@ -764,22 +607,7 @@ void Client::setAllPropertiesToDefaults() {
   setProperty("snap", 250.);
   setProperty("vibrato", 0.5);
 
-  // setProperty("midi_active", 0);
-  // setProperty("midi_mpe", 1);
-  // setProperty("midi_mpe_extended", 0);
-  // setProperty("midi_channel", 1);
-
   setProperty("data_rate", 250.);
-
-  // setProperty("kyma_poll", 0);
-
-  // {
-  // 	std::string defaultService = makeDefaultServiceName();
-  // 	setProperty("osc_service_name", defaultService.c_str());
-  // }
-
-  // setProperty("osc_active", 1);
-  // setProperty("osc_raw", 0);
 
   setProperty("bend_range", 48);
   setProperty("transpose", 0);
@@ -802,74 +630,7 @@ void Client::setAllPropertiesToDefaults() {
   }
 }
 
-// Process incoming OSC.  Used for Kyma communication.
-//
-// void Client::ProcessMessage(const osc::ReceivedMessage& m, const
-// IpEndpointName& remoteEndpoint)
-// {
-// 	// MLTEST - kyma debugging
-// 	char endpointStr[256];
-// 	remoteEndpoint.AddressAndPortAsString(endpointStr);
-// 	MLConsole() << "OSC: " << m.AddressPattern() << " from " << endpointStr
-// << "\n";
-
-// 	osc::ReceivedMessageArgumentStream args = m.ArgumentStream();
-// 	osc::int32 a1;
-// 	try
-// 	{
-// 		if( std::strcmp( m.AddressPattern(), "/osc/response_from" ) == 0
-// )
-// 		{
-// 			args >> a1 >> osc::EndMessage;
-
-// 			// MLTEST
-// 			MLConsole() << " arg = " << a1 << "\n";
-
-// 			mKymaIsConnected = true;
-// 		}
-// 		else if (std::strcmp( m.AddressPattern(),
-// "/osc/notify/midi/Soundplane" ) == 0 )
-// 		{
-// 			args >> a1 >> osc::EndMessage;
-
-// 			// MLTEST
-// 			MLConsole() << " arg = " << a1 << "\n";
-
-// 			// set voice count to a1
-// 			int newTouches = ml::clamp((int)a1, 0, kMaxTouches);
-
-// 			// Kyma is sending 0 sometimes, which there is probably
-// 			// no reason to respond to
-// 			if(newTouches > 0)
-// 			{
-// 				setProperty("max_touches", newTouches);
-// 			}
-// 		}
-// 	}
-// 	catch( osc::Exception& e )
-// 	{
-// 		MLConsole() << "oscpack error while parsing message: "
-// 		<< m.AddressPattern() << ": " << e.what() << "\n";
-// 	}
-// }
-
-// void Client::ProcessBundle(const osc::ReceivedBundle &b, const
-// IpEndpointName& remoteEndpoint)
-// {
-
-// }
-
-// const std::vector<std::string>& Client::getServicesList()
-// {
-// 	return MLNetServiceHub::getFormattedServiceNames();
-// }
-
 void Client::initialize() {}
-
-int Client::getClientState(void) {
-  // return mKymaIsConnected;
-  return false;
-}
 
 int Client::getDeviceState(void) {
   if (!mpDriver.get()) {
@@ -933,26 +694,6 @@ const char *Client::getStatusStr() {
     break;
   }
   return mStatusStr;
-}
-
-// get the string to report a specific client connection above and beyond the
-// usual OSC / MIDI communication.
-const char *Client::getClientStr() {
-  // switch(mKymaIsConnected)
-  // {
-  // 	case 0:
-  // 		snprintf(mClientStr, kMiscStringSize, "");
-  // 		break;
-
-  // 	case 1:
-  // 		snprintf(mClientStr, kMiscStringSize, "connected to Kyma");
-  // 		break;
-
-  // 	default:
-  // 		snprintf(mClientStr, kMiscStringSize, "?");
-  // 		break;
-  // }
-  return mClientStr;
 }
 
 // remove all zones from the zone list.
@@ -1125,35 +866,19 @@ TouchArray Client::scaleTouchPressureData(TouchArray in) {
 TouchArray Client::trackTouches(const SensorFrame &frame) {
   SensorFrame curvature = mTracker.preprocess(frame);
   TouchArray t = mTracker.process(curvature, mMaxTouches);
-  mSmoothedSignal = sensorFrameToSignal(curvature);
+  // mSmoothedSignal = sensorFrameToSignal(curvature);
   t = scaleTouchPressureData(t);
   return t;
 }
 
-TouchArray
-Client::getTestTouchesFromTracker(time_point<system_clock> now) {
+TouchArray Client::getTestTouchesFromTracker(time_point<system_clock> now) {
   TouchArray t = mTracker.getTestTouches(now, mMaxTouches);
   t = scaleTouchPressureData(t);
   return t;
 }
 
-void Client::saveTouchHistory(const TouchArray &t) {
-  // convert array of touches to Signal for display, history
-  {
-    std::lock_guard<std::mutex> lock(mTouchFrameMutex);
-    touchArrayToFrame(&t, &mTouchFrame);
-  }
-
-  mHistoryCtr++;
-  if (mHistoryCtr >= kSoundplaneHistorySize)
-    mHistoryCtr = 0;
-  mTouchHistory.setFrame(mHistoryCtr, mTouchFrame);
-}
-
 void Client::doInfrequentTasks() {
-  // MLNetServiceHub::PollNetServices();
-  // mOSCOutput.doInfrequentTasks();
-  // mMIDIOutput.doInfrequentTasks();
+  mOutput.doInfrequentTasks();
 
   if (getDeviceState() == kDeviceHasIsochSync) {
     if (mCarrierMaskDirty) {

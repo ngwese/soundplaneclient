@@ -3,6 +3,7 @@
 #include <thread>
 
 #include "Client.h"
+#include "ConsoleOutput.h"
 #include "Logging.h"
 #include "MLProjectInfo.h"
 
@@ -11,9 +12,10 @@ int main(int argc, char *argv[]) {
   ml::SharedResourcePointer<ml::Timers> t;
   t->start(true);
 
-  std::unique_ptr<Client> client = std::unique_ptr<Client>(new Client());
+  ConsoleOutput output(1000);
+  Client client(output);
 
-  std::this_thread::sleep_for(std::chrono::seconds(60));
+  std::this_thread::sleep_for(std::chrono::seconds(600));
 
   MLConsole() << "quitting\n";
 }
