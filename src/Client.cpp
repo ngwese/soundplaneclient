@@ -81,10 +81,6 @@ SensorFrame signalToSensorFrame(const ml::Matrix &in) {
 
 Client::Client(Output &output)
     : mOutputEnabled(false), mOutput(output),
-      // mSurface(SensorGeometry::width, SensorGeometry::height),
-      // mRawSignal(SensorGeometry::width, SensorGeometry::height),
-      // mCalibratedSignal(SensorGeometry::width, SensorGeometry::height),
-      // mSmoothedSignal(SensorGeometry::width, SensorGeometry::height),
       mCalibrating(false), mTestTouchesOn(false), mTestTouchesWasOn(false),
       mSelectingCarriers(false), mHasCalibration(false),
       mZoneIndexMap(kSoundplaneAKeyWidth, kSoundplaneAKeyHeight),
@@ -106,19 +102,6 @@ Client::Client(Output &output)
 
   clearZones();
   setAllPropertiesToDefaults();
-
-  // mTouchFrame.setDims(kSoundplaneTouchWidth, kMaxTouches);
-  // mTouchHistory.setDims(kSoundplaneTouchWidth, kMaxTouches,
-  //                       kSoundplaneHistorySize);
-
-  // make zone presets collection
-  // File zoneDir = getDefaultFileLocation(kPresetFiles,
-  // MLProjectInfo::makerName,
-  // MLProjectInfo::projectName).getChildFile("ZonePresets"); debug() <<
-  // "LOOKING for zones in " << zoneDir.getFileName() << "\n"; mZonePresets =
-  // std::unique_ptr<MLFileCollection>(new MLFileCollection("zone_preset",
-  // zoneDir, "json")); mZonePresets->processFilesImmediate();
-  // mZonePresets->dump();
 
   // now that the driver is active, start polling for changes in properties
   mTerminating = false;
@@ -369,14 +352,6 @@ void Client::process(time_point<system_clock> now) {
     outputTouches(touches, now);
   } else {
     if (mSensorFrameQueue->pop(mSensorFrame)) {
-      /// mSurface = sensorFrameToSignal(mSensorFrame);
-
-      // store surface for raw output
-      // {
-      //   std::lock_guard<std::mutex> lock(mRawSignalMutex);
-      //   mRawSignal.copy(mSurface);
-      // }
-
       if (mCalibrating) {
         mStats.accumulate(mSensorFrame);
         if (mStats.getCount() >= kSoundplaneCalibrateSize) {
@@ -555,14 +530,6 @@ void Client::sendFrameToOutputs(time_point<system_clock> now) {
     }
   }
 
-  // send optional calibrated matrix if enabled
-  // if (mSendMatrixData) {
-  //   ml::Matrix calibratedPressure = getCalibratedSignal();
-  //   if (calibratedPressure.getHeight() == SensorGeometry::height) {
-  //     mOutput.processMatrix(calibratedPressure);
-  //   }
-  // }
-
   endOutputFrame();
 }
 
@@ -617,15 +584,6 @@ void Client::setAllPropertiesToDefaults() {
 
   setProperty("hysteresis", 0.5);
   setProperty("lo_thresh", 0.1);
-
-  // menu param defaults
-  setProperty("viewmode", "calibrated");
-
-  // preset menu defaults (TODO use first choices?)
-  setProperty("zone_preset", "rows in fourths");
-  setProperty("touch_preset", "touch default");
-
-  setProperty("view_page", 0);
 
   for (int i = 0; i < 32; ++i) {
     setProperty(ml::textUtils::addFinalNumber("carrier_toggle", i), 1);

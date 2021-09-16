@@ -56,8 +56,6 @@ public:
 
   void setAllPropertiesToDefaults();
 
-  // MLFileCollection& getZonePresetsCollection() { return *mZonePresets; }
-
   float getSampleHistory(int x, int y);
 
   void getHistoryStats(float &mean, float &stdDev);
@@ -98,22 +96,6 @@ public:
 
   void getMinMaxHistory(int n);
 
-  // const ml::Matrix &getTouchFrame() { return mTouchFrame; }
-  // const ml::Matrix &getTouchHistory() { return mTouchHistory; }
-  // const ml::Matrix getRawSignal() {
-  //   std::lock_guard<std::mutex> lock(mRawSignalMutex);
-  //   return mRawSignal;
-  // }
-  // const ml::Matrix getCalibratedSignal() {
-  //   std::lock_guard<std::mutex> lock(mCalibratedSignalMutex);
-  //   return sensorFrameToSignal(mCalibratedFrame);
-  // }
-
-  // const ml::Matrix getSmoothedSignal() {
-  //   std::lock_guard<std::mutex> lock(mSmoothedSignalMutex);
-  //   return mSmoothedSignal;
-  // }
-
   const TouchArray &getTouchArray() { return mTouchArray1; }
 
   bool isWithinTrackerCalibrateArea(int i, int j);
@@ -125,9 +107,6 @@ public:
     return mZones.begin();
   }
   const std::vector<Zone>::const_iterator getZonesEnd() { return mZones.end(); }
-
-  // void setStateFromJSON(cJSON* pNode, int depth);
-  // bool loadZonePresetByName(const std::string& name);
 
   int getDeviceState(void);
 
@@ -166,7 +145,6 @@ private:
   ml::Matrix mZoneIndexMap;
 
   static const int kMiscStringSize{256};
-  void loadZonesFromString(const std::string &zoneStr);
 
   void doInfrequentTasks();
   uint64_t mLastInfrequentTaskTime;
@@ -183,10 +161,6 @@ private:
 
   int mMaxTouches;
 
-  // ml::Matrix mTouchFrame;
-  // std::mutex mTouchFrameMutex;
-  // ml::Matrix mTouchHistory;
-
   bool mCalibrating;
   bool mTestTouchesOn;
   bool mTestTouchesWasOn;
@@ -201,16 +175,6 @@ private:
 
   SensorFrameStats mStats;
   SensorFrame mCalibrateMeanInv{};
-
-  // ml::Matrix mRawSignal;
-  // std::mutex mRawSignalMutex;
-
-  // ml::Matrix mCalibratedSignal;
-  // std::mutex mCalibratedSignalMutex;
-
-  // SensorFrame mSmoothedFrame{};
-  // ml::Matrix mSmoothedSignal;
-  // std::mutex mSmoothedSignalMutex;
 
   int mCalibrateStep; // calibrate step from 0 - end
   int mTotalCalibrateSteps;
@@ -240,9 +204,6 @@ private:
 
   std::vector<float> mMaxNoiseByCarrierSet;
   std::vector<float> mMaxNoiseFreqByCarrierSet;
-
-  // std::unique_ptr<MLFileCollection> mTouchPresets;
-  // std::unique_ptr<MLFileCollection> mZonePresets;
 
   bool mVerbose;
 

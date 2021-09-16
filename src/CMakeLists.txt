@@ -25,7 +25,11 @@ include_directories(${MLLIB_SOURCE_DIR}/source/procs)
 
 include_directories(${MLLIB_SOURCE_DIR}/include)
 
-set(SOURCE_FILES
+#
+# [lib] libsoundplaneclient
+#
+
+set(LIB_SOURCE_FILES
   # ml altered
   MLDSPDeprecated.cpp
   MLVectorDeprecated.cpp
@@ -42,7 +46,17 @@ set(SOURCE_FILES
   main.cpp
 )
 
-# add_library(soundplaneclient ${SOURCE_FILES})
-add_executable(soundplaneclient ${SOURCE_FILES})
+add_library(soundplaneclient ${LIB_SOURCE_FILES})
 target_link_libraries(soundplaneclient madronalib soundplanelib)
 target_link_libraries(soundplaneclient pthread)
+
+#
+# [cli] soundplane
+#
+
+set(CLI_SOURCE_FILES
+  main.cpp
+)
+
+add_executable(soundplane ${CLI_SOURCE_FILES})
+target_link_libraries(soundplane soundplaneclient)

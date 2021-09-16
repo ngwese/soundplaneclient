@@ -3,11 +3,11 @@ cmake -DLINUX_JACK=ON -DCMAKE_CXX_FLAGS="-march=armv7-a -mfpu=neon-vfpv4" ..
 SoundplaneModel TODO
 ====================
 
-- factor out zone file i/o, mZonePresets... or dump zones entirely and handle in lua?
+- [x] factor out zone file i/o, mZonePresets... or dump zones entirely and handle in lua?
     SoundplaneModel::loadZonesFromString (passing in a vector of zones should be fine)
-- factor out touch file i/o, mTouchPresets
-- factor out (remove?) Kyma support, instead handle that outside the library
-- factor out MIDI support, OSC Support, handle outside the library
+- [x] factor out touch file i/o, mTouchPresets
+- [x] factor out (remove?) Kyma support, instead handle that outside the library
+- [x] factor out MIDI support, OSC Support, handle outside the library
     - beginOutputFrame()
     - sendTouchToOutputs()
     - sendControllerToOutputs()
@@ -28,7 +28,7 @@ The general structure of the SoundplaneModel class appears to be:
 ** Factor out calibration/carrier/output into implementations of a
 "FrameProcessor" class? ===> maybe not since carrier selection uses the tracker?
 
-- Consider removing SoundplaneModel::saveTouchHistory? particularly if its only
+- [x] Consider removing SoundplaneModel::saveTouchHistory? particularly if its only
 purpose is for display.
 
 
