@@ -13,8 +13,8 @@ namespace sp = soundplane;
 int main(int argc, char *argv[]) {
   sp::Console() << "starting client v" << MLProjectInfo::versionString << "\n";
 
-  ml::Timers timers;
-  timers.start(true);
+  ml::SharedResourcePointer<ml::Timers> t;
+  t->start(true);
 
   sp::ConsoleOutput output(1000);
   sp::Client client(output);
