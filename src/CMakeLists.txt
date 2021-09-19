@@ -1,30 +1,6 @@
 cmake_minimum_required(VERSION 3.2)
 project(client)
 
-# FIXME: temporary until there is a better depdency management strategy
-include_directories("${SPLIB_SOURCE_DIR}/include")
-include_directories("${SPLIB_SOURCE_DIR}/source")
-
-# FIXME: the madronalib install doesn't include all the dependencies referenced
-# in the installed headers, such as sse2neon. Instead of fixing the install of
-# the static library and headers for now the code is directly added as a subdir
-# and here we add the internal source dirs to find the headers.
-include_directories(${MLLIB_SOURCE_DIR}/external/aes256)
-# include_directories(${MLLIB_SOURCE_DIR}/external/cJSON)
-include_directories(${MLLIB_SOURCE_DIR}/external/ffft)
-include_directories(${MLLIB_SOURCE_DIR}/external/utf)
-include_directories(${MLLIB_SOURCE_DIR}/external/sse2neon)
-include_directories(${MLLIB_SOURCE_DIR}/external/oscpack/ip)
-include_directories(${MLLIB_SOURCE_DIR}/external/oscpack/osc)
-
-include_directories(${MLLIB_SOURCE_DIR}/source/app)
-include_directories(${MLLIB_SOURCE_DIR}/source/DSP)
-include_directories(${MLLIB_SOURCE_DIR}/source/matrix)
-include_directories(${MLLIB_SOURCE_DIR}/source/networking)
-include_directories(${MLLIB_SOURCE_DIR}/source/procs)
-
-include_directories(${MLLIB_SOURCE_DIR}/include)
-
 #
 # [lib] libsoundplaneclient
 #
@@ -47,8 +23,35 @@ set(LIB_SOURCE_FILES
 )
 
 add_library(soundplaneclient ${LIB_SOURCE_FILES})
-target_link_libraries(soundplaneclient madronalib soundplanelib)
-target_link_libraries(soundplaneclient pthread)
+
+target_include_directories(soundplaneclient PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+
+# FIXME: temporary until there is a better depdency management strategy
+target_include_directories(soundplaneclient PUBLIC "${SPLIB_SOURCE_DIR}/include")
+target_include_directories(soundplaneclient PUBLIC "${SPLIB_SOURCE_DIR}/source")
+
+# FIXME: the madronalib install doesn't include all the dependencies referenced
+# in the installed headers, such as sse2neon. Instead of fixing the install of
+# the static library and headers for now the code is directly added as a subdir
+# and here we add the internal source dirs to find the headers.
+target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/external/aes256)
+# target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/external/cJSON)
+target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/external/ffft)
+target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/external/utf)
+target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/external/sse2neon)
+target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/external/oscpack/ip)
+target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/external/oscpack/osc)
+
+target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/source/app)
+target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/source/DSP)
+target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/source/matrix)
+target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/source/networking)
+target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/source/procs)
+
+target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/include)
+
+
+target_link_libraries(soundplaneclient madronalib soundplanelib pthread)
 
 #
 # [cli] soundplane
