@@ -22,7 +22,10 @@ set(LIB_SOURCE_FILES
   main.cpp
 )
 
-add_library(soundplaneclient ${LIB_SOURCE_FILES})
+add_library(soundplaneclient STATIC ${LIB_SOURCE_FILES})
+set_target_properties(soundplaneclient PROPERTIES
+                      POSITION_INDEPENDENT_CODE ON)
+
 
 target_include_directories(soundplaneclient PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
