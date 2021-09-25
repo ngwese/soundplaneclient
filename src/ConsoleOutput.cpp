@@ -15,7 +15,7 @@ void ConsoleOutput::beginOutputFrame(time_point<system_clock> now) {
   if (mFrames % mOutputInterval == 0) {
     auto now = std::chrono::system_clock::now();
     auto elapsed = std::chrono::duration_cast<seconds>(now - mIntervalStart).count();
-    Console() << "begin[" << mFrames << "], " << mOutputInterval / elapsed << " fr/sec" << std::endl;
+    Console() << "begin[" << mFrames << "], " << mOutputInterval / elapsed << " fr/sec\n";
     mIntervalStart = now;
   }
 }
@@ -40,12 +40,12 @@ void ConsoleOutput::processTouch(int i, int offset, const Touch &t) {
 
 void ConsoleOutput::processController(int zoneID, int offset, const ZoneMessage &m) {
   if (mFrames % 10 == 0) {
-    Console() << "   c: " << zoneID << " " << offset /*<< " " << m*/ << std::endl;
+    Console() << "   c: " << zoneID << " " << offset /*<< " " << m*/ << "\n";
   }
 }
 
 void ConsoleOutput::endOutputFrame() {
   if (mFrames % mOutputInterval == 0) {
-    Console() << "end" << std::endl;
+    Console() << "end\n";
   }
 }

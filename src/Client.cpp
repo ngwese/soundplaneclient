@@ -123,7 +123,7 @@ Client::~Client() {
 
   if (mProcessThread.joinable()) {
     mProcessThread.join();
-    Console() << "Client: mProcessThread terminated.\n";
+    Console() << "Client: mProcessThread terminated.\n" << std::flush;
   }
 
   mpDriver = nullptr;
@@ -132,7 +132,7 @@ Client::~Client() {
 void Client::doPropertyChangeAction(ml::Symbol p,
                                              const ml::Value &newVal) {
   Console() << "Client::doPropertyChangeAction: " << p << " -> " <<
-  newVal << "\n";
+  newVal << "\n" << std::flush;
 
   int propertyType = newVal.getType();
   switch (propertyType) {
@@ -245,6 +245,7 @@ void Client::onStartup() {
   Console() << "  firmware: " << mpDriver->getFirmwareVersion() << "\n";
   Console() << "    serial: " << mSerialNumber << "\n";
   Console() << "  carriers: " << mpDriver->getCarriers() << "\n";
+  Console() << std::flush;
 
   // connected but not calibrated -- disable output.
   enableOutput(false);
@@ -263,37 +264,36 @@ void Client::onFrame(const SensorFrame &frame) {
 void Client::onError(int error, const char *errStr) {
   switch (error) {
   case kDevDataDiffTooLarge:
-    Console() << "error: frame difference too large: " << errStr << "\n";
+    Console() << "error: frame difference too large: " << errStr << "\n" << std::flush;
     beginCalibrate();
     break;
   case kDevGapInSequence:
     if (mVerbose) {
-      Console() << "note: gap in sequence " << errStr << "\n";
+      Console() << "note: gap in sequence " << errStr << "\n" << std::flush;
     }
     break;
   case kDevReset:
     if (mVerbose) {
-      Console() << "isoch stalled, resetting " << errStr << "\n";
+      Console() << "isoch stalled, resetting " << errStr << "\n" << std::flush;
     }
     break;
   case kDevPayloadFailed:
     if (mVerbose) {
-      Console() << "payload failed at sequence " << errStr << "\n";
+      Console() << "payload failed at sequence " << errStr << "\n" << std::flush;
     }
     break;
   case kDevNoInterface:
     Console() << "error: could not create device interface: " << errStr
-                << "\n";
+                << "\n" << std::flush;
     break;
   case kDevInsufficientPower:
-    Console() << "error: insufficient USB power: " << errStr << "\n";
+    Console() << "error: insufficient USB power: " << errStr << "\n" << std::flush;
     break;
   case kDevUnableToOpenDevice:
-    Console() << "error: unable to open device: " << errStr << "\n";
+    Console() << "error: unable to open device: " << errStr << "\n" << std::flush;
     break;
   default:
-    Console() << "unknown error: " << errStr << "\n";
-
+    Console() << "unknown error: " << errStr << "\n" << std::flush;
     break;
   }
 }
@@ -320,7 +320,7 @@ void Client::processThread() {
     if (mProcessCounter >= 1000) {
       if (mVerbose) {
         if (mMaxRecentQueueSize >= kSensorFrameQueueSize) {
-          Console() << "warning: input queue full; " << debugFirstQueueFull << " of 1000\n";
+          Console() << "warning: input queue full; " << debugFirstQueueFull << " of 1000\n" << std::flush;
         }
       }
 
@@ -504,7 +504,7 @@ void Client::dumpOutputsByZone() {
 
       Console() << "]";
     }
-    Console() << "\n";
+    Console() << "\n" << std::flush;
   }
 }
 
@@ -782,10 +782,10 @@ void Client::doInfrequentTasks() {
 
   if (getDeviceState() == kDeviceHasIsochSync) {
     if (mCarrierMaskDirty) {
-      Console() << "mCarrierMaskDirty: calling enableCarriers()\n";
+      Console() << "mCarrierMaskDirty: calling enableCarriers()\n" << std::flush;
       enableCarriers(mCarriersMask);
     } else if (mNeedsCarriersSet) {
-      Console() << "mNeedsCarriersSet: calling setCarriers() and triggering calibration\n";
+      Console() << "mNeedsCarriersSet: calling setCarriers() and triggering calibration\n" << std::flush;
       mNeedsCarriersSet = false;
       if (mDoOverrideCarriers) {
         setCarriers(mOverrideCarriers);
@@ -795,14 +795,14 @@ void Client::doInfrequentTasks() {
 
       mNeedsCalibrate = true;
     } else if (mNeedsCalibrate && (!mSelectingCarriers)) {
-      Console() << "mNeedsCalibrate: calling beginCalibrate()\n";
+      Console() << "mNeedsCalibrate: calling beginCalibrate()\n" << std::flush;
       mNeedsCalibrate = false;
       beginCalibrate();
     }
   }
 
   if (mCalibrating) {
-    Console() << "Client::doInfrequentTasks(): calib progress = " << getCalibrateProgress() << "\n";
+    Console() << "Client::doInfrequentTasks(): calib progress = " << getCalibrateProgress() << "\n" << std::flush;
   }
 }
 
@@ -835,6 +835,7 @@ void Client::dumpCarriers(const SoundplaneDriver::Carriers &carriers) {
     int c = carriers[i];
     Console() << i << ": " << c << " [" << carrierToFrequency(c) << "Hz] \n";
   }
+  Console() << std::flush;
 }
 
 void Client::enableOutput(bool b) { mOutputEnabled = b; }
@@ -849,7 +850,7 @@ void Client::clear() { mTracker.clear(); }
 //
 void Client::beginCalibrate() {
   if (getDeviceState() == kDeviceHasIsochSync) {
-    Console() << "Client::beginCalibrate: getDeviceState() == kDeviceHasIsochSync; starting calibration\n";
+    Console() << "Client::beginCalibrate: getDeviceState() == kDeviceHasIsochSync; starting calibration\n" << std::flush;
     mStats.clear();
     mCalibrating = true;
   }
@@ -858,7 +859,7 @@ void Client::beginCalibrate() {
 // called by process routine when enough samples have been collected.
 //
 void Client::endCalibrate() {
-  Console() << "Client::endCalibrate() called\n";
+  Console() << "Client::endCalibrate() called\n" << std::flush;
   SensorFrame mean = clamp(mStats.mean(), 0.0001f, 1.f);
   mCalibrateMeanInv = divide(fill(1.f), mean);
   mCalibrating = false;
@@ -889,7 +890,7 @@ void Client::beginSelectCarriers() {
     mMaxNoiseFreqByCarrierSet.clear();
 
     // setup first set of carrier frequencies
-    Console() << "testing carriers set " << mSelectCarriersStep << "...\n";
+    Console() << "testing carriers set " << mSelectCarriersStep << "...\n" << std::flush;
     makeStandardCarrierSet(mCarriers, mSelectCarriersStep);
     setCarriers(mCarriers);
   }
@@ -947,6 +948,8 @@ void Client::nextSelectCarriersStep() {
     endSelectCarriers();
   }
 
+  Console() << std::flush;
+
   // clear data
   mStats.clear();
 }
@@ -980,6 +983,7 @@ void Client::endSelectCarriers() {
   }
   setProperty("carriers", cSig);
   Console() << "carrier select done.\n";
+  Console() << std::flush;
 
   mSelectingCarriers = false;
   mNeedsCalibrate = true;
