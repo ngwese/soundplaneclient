@@ -129,10 +129,11 @@ Client::~Client() {
   mpDriver = nullptr;
 }
 
-void Client::doPropertyChangeAction(ml::Symbol p,
-                                             const ml::Value &newVal) {
-  Console() << "Client::doPropertyChangeAction: " << p << " -> " <<
-  newVal << "\n" << std::flush;
+void Client::doPropertyChangeAction(ml::Symbol p, const ml::Value &newVal) {
+  if (mVerbose) {
+    Console() << "Client::doPropertyChangeAction: " << p << " -> " <<
+    newVal << "\n" << std::flush;
+  }
 
   int propertyType = newVal.getType();
   switch (propertyType) {
