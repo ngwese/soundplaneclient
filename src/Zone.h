@@ -21,6 +21,7 @@
 #include <bitset>
 #include <list>
 #include <map>
+#include <vector>
 
 namespace soundplane {
 
@@ -67,7 +68,10 @@ public:
   Zone();
   ~Zone() {}
 
+  static Zone buildNoteRow(const char *name, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t note);
   static Zone presetChromatic();
+  static std::vector<Zone> presetRowsInFourths();
+  static std::vector<Zone> presetRowsInOctaves();
 
   void newFrame();
   void addTouchToFrame(int i, Touch t);

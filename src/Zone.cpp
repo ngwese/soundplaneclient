@@ -31,12 +31,39 @@ Zone::Zone() {
   }
 }
 
-Zone Zone::presetChromatic() {
+Zone Zone::buildNoteRow(const char *name, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t note) {
   Zone z;
-  z.mName = TextFragment("chromatic");
+  z.mName = TextFragment(name);
   z.mType = Symbol("note_row");
-  z.setBounds(MLRect(0, 0, kSoundplaneAKeyWidth, kSoundplaneAKeyHeight));
+  z.setBounds(MLRect(x1, y1, x2, y2));
+  z.mStartNote = note;
   return z;
+}
+
+Zone Zone::presetChromatic() {
+  return buildNoteRow("chromatic", 0, 0, kSoundplaneAKeyWidth, kSoundplaneAKeyHeight, 57);
+}
+
+std::vector<Zone> Zone::presetRowsInFourths() {
+  std::vector<Zone> preset = {
+    buildNoteRow("B2", 0, 0, 30, 1, 47),
+    buildNoteRow("E2", 0, 1, 30, 1, 52),
+    buildNoteRow("A2", 0, 2, 30, 1, 57),
+    buildNoteRow("D3", 0, 3, 30, 1, 62),
+    buildNoteRow("D3", 0, 3, 30, 1, 62),
+  };
+  return preset;
+}
+
+std::vector<Zone> Zone::presetRowsInOctaves() {
+  std::vector<Zone> preset = {
+    buildNoteRow("A0", 0, 0, 30, 1, 33),
+    buildNoteRow("A1", 0, 1, 30, 1, 45),
+    buildNoteRow("A2", 0, 2, 30, 1, 57),
+    buildNoteRow("A3", 0, 3, 30, 1, 69),
+    buildNoteRow("A4", 0, 3, 30, 1, 81),
+  };
+  return preset;
 }
 
 void Zone::setBounds(MLRect b) {
