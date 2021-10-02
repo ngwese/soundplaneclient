@@ -14,6 +14,7 @@ set(LIB_SOURCE_FILES
   MLPropertySet.cpp
   # sp altered
   TouchTracker.cpp
+  ZoneSpec.cpp
   Zone.cpp
   # new
   ConsoleOutput.cpp

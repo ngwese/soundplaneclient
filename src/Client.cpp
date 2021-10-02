@@ -668,6 +668,10 @@ void Client::setZone(Zone zone) {
   setZones(zones);
 }
 
+void Client::setZone(ZoneSpec spec) {
+  setZone(Zone::fromSpec(spec));
+}
+
 void Client::setZones(std::vector<Zone> zones) {
   assert(zones.size() <= kSoundplaneAMaxZones);
   mOutputEnabled = false;
@@ -676,6 +680,14 @@ void Client::setZones(std::vector<Zone> zones) {
   buildZoneIndexMap();
   mOutputEnabled = true;
   sendParametersToZones();
+}
+
+void Client::setZones(std::vector<ZoneSpec> specs) {
+  std::vector<Zone> zones;
+  for (auto &spec : specs) {
+    zones.push_back(Zone::fromSpec(spec));
+  }
+  setZones(zones);
 }
 
 void Client::buildZoneIndexMap()

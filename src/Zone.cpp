@@ -37,7 +37,7 @@ Zone Zone::buildNoteRow(const char *name, uint8_t x1, uint8_t y1, uint8_t x2, ui
   z.mType = Symbol("note_row");
   z.setBounds(MLRect(x1, y1, x2, y2));
   z.mStartNote = note;
-  return z;
+  return std::move(z);
 }
 
 Zone Zone::presetChromatic() {
@@ -52,7 +52,7 @@ std::vector<Zone> Zone::presetRowsInFourths() {
     buildNoteRow("D3", 0, 3, 30, 1, 62),
     buildNoteRow("D3", 0, 3, 30, 1, 62),
   };
-  return preset;
+  return std::move(preset);
 }
 
 std::vector<Zone> Zone::presetRowsInOctaves() {
@@ -63,7 +63,16 @@ std::vector<Zone> Zone::presetRowsInOctaves() {
     buildNoteRow("A3", 0, 3, 30, 1, 69),
     buildNoteRow("A4", 0, 3, 30, 1, 81),
   };
-  return preset;
+  return std::move(preset);
+}
+
+Zone Zone::fromSpec(const ZoneSpec &spec) {
+  Zone z;
+  z.mName = spec.getName();
+  z.mType = spec.getType();
+  z.mStartNote = spec.getStartNote();
+  z.setBounds(spec.getBounds());
+  return std::move(z);
 }
 
 void Zone::setBounds(MLRect b) {

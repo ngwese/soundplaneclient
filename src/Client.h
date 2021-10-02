@@ -102,7 +102,9 @@ public:
   const int getHistoryCtr() { return mHistoryCtr; }
 
   void setZone(Zone zone);
+  void setZone(ZoneSpec spec);
   void setZones(std::vector<Zone> zones);
+  void setZones(std::vector<ZoneSpec> specs);
   const std::vector<Zone>::const_iterator getZonesBegin() {
     return mZones.begin();
   }

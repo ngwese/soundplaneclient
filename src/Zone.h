@@ -13,6 +13,7 @@
 #include "SoundplaneDriver.h"
 #include "SoundplaneModelA.h"
 #include "TouchTracker.h"
+#include "ZoneSpec.h"
 
 #include "MLParameter.h"
 #include "MLSymbol.h"
@@ -73,6 +74,8 @@ public:
   static std::vector<Zone> presetRowsInFourths();
   static std::vector<Zone> presetRowsInOctaves();
 
+  static Zone fromSpec(const ZoneSpec &spec);
+
   void newFrame();
   void addTouchToFrame(int i, Touch t);
   void storeAnyNewTouches();
@@ -94,6 +97,8 @@ public:
   MLRect getBounds() const { return mBounds; }
   Symbol getType() const { return mType; }
   int getOffset() const { return mOffset; }
+  int getStartNote() const { return mStartNote; }
+  int getZoneID() const { return mZoneID; }
 
   const ZoneMessage &getController() const { return mOutputController; }
 
