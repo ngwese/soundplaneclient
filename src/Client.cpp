@@ -245,7 +245,7 @@ void Client::onStartup() {
   Console() << "     state: " << mpDriver->getDeviceState() << "\n";
   Console() << "  firmware: " << mpDriver->getFirmwareVersion() << "\n";
   Console() << "    serial: " << mSerialNumber << "\n";
-  Console() << "  carriers: " << mpDriver->getCarriers() << "\n";
+  // Console() << "  carriers: " << mpDriver->getCarriers() << "\n";
   Console() << std::flush;
 
   // connected but not calibrated -- disable output.

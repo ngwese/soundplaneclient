@@ -72,6 +72,9 @@ Zone Zone::fromSpec(const ZoneSpec &spec) {
   z.mType = spec.getType();
   z.mStartNote = spec.getStartNote();
   z.setBounds(spec.getBounds());
+  z.mControllerNum1 = spec.getController1();
+  z.mControllerNum2 = spec.getController2();
+  z.mControllerNum3 = spec.getController3();
   return std::move(z);
 }
 
@@ -288,7 +291,8 @@ void Zone::processTouchesNoteRow(const std::bitset<kMaxTouches> &freedTouches) {
 }
 
 void Zone::processTouchesControllerX() {
-  if (getNumberOfActiveTouches() > 0) {
+  mOutputController.active = getNumberOfActiveTouches() > 0;
+  if (mOutputController.active) {
     float zVal = ml::clamp(getMaxZOfActiveTouches(), 0.f, 1.f);
     if (zVal > 0.f) {
       Vec3 avgPos = getAveragePositionOfActiveTouches();
@@ -301,7 +305,8 @@ void Zone::processTouchesControllerX() {
 }
 
 void Zone::processTouchesControllerY() {
-  if (getNumberOfActiveTouches() > 0) {
+  mOutputController.active = getNumberOfActiveTouches() > 0;
+  if (mOutputController.active) {
     Vec3 avgPos = getAveragePositionOfActiveTouches();
     float yVal = ml::clamp(avgPos.y(), 0.f, 1.f);
     mOutputController.number1 = mControllerNum1;
@@ -310,7 +315,8 @@ void Zone::processTouchesControllerY() {
 }
 
 void Zone::processTouchesControllerXY() {
-  if (getNumberOfActiveTouches() > 0) {
+  mOutputController.active = getNumberOfActiveTouches() > 0;
+  if (mOutputController.active) {
     float zVal = ml::clamp(getMaxZOfActiveTouches(), 0.f, 1.f);
     if (zVal > 0.f) {
       Vec3 avgPos = getAveragePositionOfActiveTouches();
@@ -325,8 +331,8 @@ void Zone::processTouchesControllerXY() {
 }
 
 void Zone::processTouchesControllerToggle() {
-  bool touchOn = getNumberOfNewTouches() > 0;
-  if (touchOn) {
+  mOutputController.active = getNumberOfActiveTouches() > 0;
+  if (mOutputController.active) {
     mToggleValue = !mToggleValue;
     float xVal = static_cast<float>(mToggleValue);
     mOutputController.number1 = mControllerNum1;

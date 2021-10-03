@@ -4,23 +4,43 @@
 
 using namespace soundplane;
 
-ZoneSpec::ZoneSpec() {
+static const Symbol noteRowType("note_row");
+static const Symbol toggleType("toggle");
+static const Symbol xyType("xy");
+static const Symbol xType("x");
+static const Symbol yType("y");
+
+ZoneSpec::ZoneSpec(const TextFragment &name, const Symbol &zoneType, const MLRect &bounds) : mName(name), mType(zoneType), mBounds(bounds) {
 }
 
-// ZoneSpec &ZoneSpec::operator=(const ZoneSpec &b) noexcept {
-//   if (this != &b) {
-
-
-//   }
-//   return *this;
-// }
-
 ZoneSpec ZoneSpec::buildNoteRow(const char *name, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t note) {
-  ZoneSpec z;
-  z.mName = TextFragment(name);
-  z.mType = Symbol("note_row");
-  z.setBounds(MLRect(x1, y1, x2, y2));
+  ZoneSpec z(TextFragment(name), noteRowType, MLRect(x1, y1, x2, y2));
   z.mStartNote = note;
+  return std::move(z);
+}
+
+ZoneSpec ZoneSpec::buildToggle(const char *name, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t ctrl1) {
+  ZoneSpec z(TextFragment(name), toggleType, MLRect(x1, y1, x2, y2));
+  z.mControllerNum1 = ctrl1;
+  return std::move(z);
+}
+
+ZoneSpec ZoneSpec::buildXY(const char *name, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t ctrlx, uint8_t ctrly) {
+  ZoneSpec z(TextFragment(name), xyType, MLRect(x1, y1, x2, y2));
+  z.mControllerNum1 = ctrlx;
+  z.mControllerNum2 = ctrly;
+  return std::move(z);
+}
+
+ZoneSpec ZoneSpec::buildX(const char *name, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t ctrlx) {
+  ZoneSpec z(TextFragment(name), xType, MLRect(x1, y1, x2, y2));
+  z.mControllerNum1 = ctrlx;
+  return std::move(z);
+};
+
+ZoneSpec ZoneSpec::buildY(const char *name, uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t ctrly) {
+  ZoneSpec z(TextFragment(name), yType, MLRect(x1, y1, x2, y2));
+  z.mControllerNum1 = ctrly;
   return std::move(z);
 }
 

@@ -36,6 +36,7 @@ struct ZoneMessage {
   float x{0.f};
   float y{0.f};
   float z{0.f};
+  bool active{false};
 };
 
 inline bool operator==(const ZoneMessage &a, const ZoneMessage &b) {
