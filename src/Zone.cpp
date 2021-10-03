@@ -41,7 +41,7 @@ Zone Zone::buildNoteRow(const char *name, uint8_t x1, uint8_t y1, uint8_t x2, ui
 }
 
 Zone Zone::presetChromatic() {
-  return buildNoteRow("chromatic", 0, 0, kSoundplaneAKeyWidth, kSoundplaneAKeyHeight, 57);
+  return std::move(buildNoteRow("chromatic", 0, 0, kSoundplaneAKeyWidth, kSoundplaneAKeyHeight, 57));
 }
 
 std::vector<Zone> Zone::presetRowsInFourths() {
