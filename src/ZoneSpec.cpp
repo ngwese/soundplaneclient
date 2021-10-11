@@ -54,7 +54,7 @@ std::vector<ZoneSpec> ZoneSpec::presetRowsInFourths() {
     buildNoteRow("E2", 0, 1, 30, 1, 52),
     buildNoteRow("A2", 0, 2, 30, 1, 57),
     buildNoteRow("D3", 0, 3, 30, 1, 62),
-    buildNoteRow("D3", 0, 3, 30, 1, 62),
+    buildNoteRow("G3", 0, 4, 30, 1, 67),
   };
   return preset;
 }
@@ -65,7 +65,7 @@ std::vector<ZoneSpec> ZoneSpec::presetRowsInOctaves() {
     buildNoteRow("A1", 0, 1, 30, 1, 45),
     buildNoteRow("A2", 0, 2, 30, 1, 57),
     buildNoteRow("A3", 0, 3, 30, 1, 69),
-    buildNoteRow("A4", 0, 3, 30, 1, 81),
+    buildNoteRow("A4", 0, 4, 30, 1, 81),
   };
   return preset;
 }
