@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.2)
 project(soundplaneclient)
 
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3")
 
 set(MLLIB_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dep/madronalib")
 set(SPLIB_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dep/soundplanelib")

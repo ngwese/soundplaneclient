@@ -39,7 +39,7 @@ target_include_directories(soundplaneclient PUBLIC "${SPLIB_SOURCE_DIR}/source")
 # the static library and headers for now the code is directly added as a subdir
 # and here we add the internal source dirs to find the headers.
 target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/external/aes256)
-# target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/external/cJSON)
+target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/external/cJSON)
 target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/external/ffft)
 target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/external/utf)
 target_include_directories(soundplaneclient PUBLIC ${MLLIB_SOURCE_DIR}/external/sse2neon)
